@@ -1,3 +1,4 @@
+from pathlib import Path
 import streamlit as st
 import streamlit.components.v1 as components
 import base64
@@ -16,13 +17,16 @@ API_KEY = "live_7a611a04eeb1ac043f43a92245935f274608d65acac4fcb584f1baad81aa8bd7
 HEADERS = {"x-nxopen-api-key": API_KEY}
 
 # OS별 BASE_DIR (세준 환경 기준)
-if platform.system() == "Windows":
-    BASE_DIR = Path("C:/Users/junab/OneDrive/py/FC ONLINE")
-else:
-    BASE_DIR = Path("/Users/kimsejune/OneDrive/py/FC ONLINE")
+#if platform.system() == "Windows":
+#    BASE_DIR = Path("C:/Users/junab/OneDrive/py/FC ONLINE")
+#else:
+#    BASE_DIR = Path("/Users/kimsejune/OneDrive/py/FC ONLINE")
+
+BASE_DIR = Path(__file__).resolve().parent
 
 WORLDCUP_DETAIL_JSON_PATH = BASE_DIR / "worldcup_detailed.json"
 NICKNAME_MAP_PATH = BASE_DIR / "nickname_map.json"
+
 
 st.set_page_config(
     page_title="FC ONLINE 월드컵 결과 대시보드",
