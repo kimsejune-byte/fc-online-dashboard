@@ -297,126 +297,125 @@ tab_overview, tab_compare, tab_matches = st.tabs(
 # ----------------------------------------
 
 with tab_overview:
-    import base64
-import streamlit.components.v1 as components
+
 
 # ======================================================
 # 🏆 1vs1 공식경기 명예의 전당
 # ======================================================
-st.markdown("## 🏆 1vs1 공식경기 명예의 전당 Presented by Sejune inc.")
+    st.markdown("## 🏆 1vs1 공식경기 명예의 전당 Presented by Sejune inc.")
 
-TIER_ICON_DIR = BASE_DIR / "assets" / "tier_icons"
+    TIER_ICON_DIR = BASE_DIR / "assets" / "tier_icons"
 
-# -------------------------------
-# 이미지 → base64 변환
-# -------------------------------
-def image_to_base64(img_path: Path):
-    if img_path is None or not img_path.exists():
+    # -------------------------------
+    # 이미지 → base64 변환
+    # -------------------------------
+    def image_to_base64(img_path: Path):
+        if img_path is None or not img_path.exists():
+            return None
+        with open(img_path, "rb") as f:
+            return "data:image/png;base64," + base64.b64encode(f.read()).decode()
+
+    # -------------------------------
+    # 티어 → 아이콘 경로
+    # (FC 온라인 실제 표기 기준)
+    # -------------------------------
+    def get_tier_icon_path(name: str):
+        if "챔피언스" in name:
+            return TIER_ICON_DIR / "champions.png"
+        if "슈퍼챌린지" in name:
+            return TIER_ICON_DIR / "super_challenger.png"
+        if "월드클래스1" in name:
+            return TIER_ICON_DIR / "worldclass_1.png"
+        if "월드클래스2" in name:
+            return TIER_ICON_DIR / "worldclass_2.png"
+        if "월드클래스3" in name:
+            return TIER_ICON_DIR / "worldclass_3.png"
+        if "프로1" in name:
+            return TIER_ICON_DIR / "pro_1.png"
+        if "프로2" in name:
+            return TIER_ICON_DIR / "pro_2.png"
         return None
-    with open(img_path, "rb") as f:
-        return "data:image/png;base64," + base64.b64encode(f.read()).decode()
 
-# -------------------------------
-# 티어 → 아이콘 경로
-# (FC 온라인 실제 표기 기준)
-# -------------------------------
-def get_tier_icon_path(name: str):
-    if "챔피언스" in name:
-        return TIER_ICON_DIR / "champions.png"
-    if "슈퍼챌린지" in name:
-        return TIER_ICON_DIR / "super_challenger.png"
-    if "월드클래스1" in name:
-        return TIER_ICON_DIR / "worldclass_1.png"
-    if "월드클래스2" in name:
-        return TIER_ICON_DIR / "worldclass_2.png"
-    if "월드클래스3" in name:
-        return TIER_ICON_DIR / "worldclass_3.png"
-    if "프로1" in name:
-        return TIER_ICON_DIR / "pro_1.png"
-    if "프로2" in name:
-        return TIER_ICON_DIR / "pro_2.png"
-    return None
+    # -------------------------------
+    # 티어 → 컬러
+    # -------------------------------
+    def get_tier_color(name: str):
+        if "챔피언스" in name:
+            return "#ff4d4f"
+        if "슈퍼챌린지" in name:
+            return "#00e5d4"
+        if "챌린저" in name:
+            return "#00c2b3"
+        if "월드클래스" in name:
+            return "#8a5cff"
+        if "프로" in name:
+            return "#f5b041"
+        return "#1f77b4"
 
-# -------------------------------
-# 티어 → 컬러
-# -------------------------------
-def get_tier_color(name: str):
-    if "챔피언스" in name:
-        return "#ff4d4f"
-    if "슈퍼챌린지" in name:
-        return "#00e5d4"
-    if "챌린저" in name:
-        return "#00c2b3"
-    if "월드클래스" in name:
-        return "#8a5cff"
-    if "프로" in name:
-        return "#f5b041"
-    return "#1f77b4"
+    # -------------------------------
+    # 데이터 없을 경우
+    # -------------------------------
+    if max_division_df.empty:
+        st.info("최고 공식경기 등급 데이터를 불러올 수 없습니다.")
+    else:
+        # division_code 낮을수록 상위 티어
+        hall_df = (
+            max_division_df
+            .sort_values("division_code", ascending=True)
+            .reset_index(drop=True)
+        )
 
-# -------------------------------
-# 데이터 없을 경우
-# -------------------------------
-if max_division_df.empty:
-    st.info("최고 공식경기 등급 데이터를 불러올 수 없습니다.")
-else:
-    # division_code 낮을수록 상위 티어
-    hall_df = (
-        max_division_df
-        .sort_values("division_code", ascending=True)
-        .reset_index(drop=True)
-    )
+        cards_html = ""
 
-    cards_html = ""
+        for rank, row in hall_df.iterrows():
+            color = get_tier_color(row["division_name"])
 
-    for rank, row in hall_df.iterrows():
-        color = get_tier_color(row["division_name"])
+            icon_path = get_tier_icon_path(row["division_name"])
+            icon_base64 = image_to_base64(icon_path)
 
-        icon_path = get_tier_icon_path(row["division_name"])
-        icon_base64 = image_to_base64(icon_path)
+            icon_html = ""
+            if icon_base64:
+                icon_html = f"""
+                <img src="{icon_base64}"
+                    width="56"
+                    style="margin-right:16px;">
+                """
 
-        icon_html = ""
-        if icon_base64:
-            icon_html = f"""
-            <img src="{icon_base64}"
-                 width="56"
-                 style="margin-right:16px;">
-            """
-
-        cards_html += f"""
-        <div style="
-            background:#0e1117;
-            border-left:6px solid {color};
-            padding:16px;
-            margin-bottom:14px;
-            border-radius:14px;
-            box-shadow:0 0 10px rgba(0,0,0,.4);
-            transition:transform .2s, box-shadow .2s;
-        " onmouseover="
-            this.style.transform='scale(1.02)';
-            this.style.boxShadow='0 0 18px rgba(255,255,255,0.15)';
-        "
-          onmouseout="
-            this.style.transform='scale(1)';
-            this.style.boxShadow='0 0 10px rgba(0,0,0,.4)';
-        ">
-            <div style="display:flex;align-items:center;">
-                {icon_html}
-                <div>
-                    <div style="color:white;font-weight:700;font-size:16px;">
-                        #{rank + 1} {row['nickname']}
-                    </div>
-                    <div style="color:{color};font-weight:700;">
-                        {row['division_name']}
-                    </div>
-                    <div style="color:#9aa0a6;font-size:12px;">
-                        달성일: {row['achievementDate'] or "N/A"}
+            cards_html += f"""
+            <div style="
+                background:#0e1117;
+                border-left:6px solid {color};
+                padding:16px;
+                margin-bottom:14px;
+                border-radius:14px;
+                box-shadow:0 0 10px rgba(0,0,0,.4);
+                transition:transform .2s, box-shadow .2s;
+            " onmouseover="
+                this.style.transform='scale(1.02)';
+                this.style.boxShadow='0 0 18px rgba(255,255,255,0.15)';
+            "
+            onmouseout="
+                this.style.transform='scale(1)';
+                this.style.boxShadow='0 0 10px rgba(0,0,0,.4)';
+            ">
+                <div style="display:flex;align-items:center;">
+                    {icon_html}
+                    <div>
+                        <div style="color:white;font-weight:700;font-size:16px;">
+                            #{rank + 1} {row['nickname']}
+                        </div>
+                        <div style="color:{color};font-weight:700;">
+                            {row['division_name']}
+                        </div>
+                        <div style="color:#9aa0a6;font-size:12px;">
+                            달성일: {row['achievementDate'] or "N/A"}
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        """
+            """
 
-    components.html(cards_html, height=1100, scrolling=True)
+        components.html(cards_html, height=1100, scrolling=True)
 
     st.markdown("---")
   
