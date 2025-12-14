@@ -426,51 +426,6 @@ else:
     st.subheader(" 유저별 요약 통계")
     st.dataframe(summary, use_container_width=True)
 
-    # =============================
-    # 시각화
-    # =============================
-    st.markdown("### 📊 시각화")
-
-    col_a, col_b, col_c = st.columns(3)
-
-    # 승률
-    with col_a:
-        st.markdown("#### 승률")
-        import plotly.express as px
-        win_df = summary.sort_values("win_rate", ascending=False)
-        fig = px.bar(
-            win_df, x="win_rate", y="nickname",
-            orientation="h", text="win_rate",
-            color="win_rate", color_continuous_scale="Blues"
-        )
-        fig.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
-        st.plotly_chart(fig, use_container_width=True)
-
-    # 평균 득점
-    with col_b:
-        st.markdown("#### 평균 득점")
-        goals_df = summary.assign(avg_goals=summary["total_goals"] / summary["games_played"])
-        goals_df = goals_df.sort_values("avg_goals", ascending=False)
-        fig = px.bar(
-            goals_df, x="avg_goals", y="nickname",
-            orientation="h", text="avg_goals",
-            color="avg_goals", color_continuous_scale="Blues"
-        )
-        fig.update_traces(texttemplate="%{text:.2f} 골", textposition="outside")
-        st.plotly_chart(fig, use_container_width=True)
-
-    # 평균 슈팅
-    with col_c:
-        st.markdown("#### 평균 슈팅")
-        shots_df = summary.assign(avg_shots=summary["total_shots"] / summary["games_played"])
-        shots_df = shots_df.sort_values("avg_shots", ascending=False)
-        fig = px.bar(
-            shots_df, x="avg_shots", y="nickname",
-            orientation="h", text="avg_shots",
-            color="avg_shots", color_continuous_scale="Blues"
-        )
-        fig.update_traces(texttemplate="%{text:.2f} 회", textposition="outside")
-        st.plotly_chart(fig, use_container_width=True)
 
 
 # ---------- 탭 2: 유저 비교 ----------
