@@ -400,7 +400,7 @@ with tab_overview:
             </div>
             """
 
-        components.html(cards_html, height=700, scrolling=False)
+        components.html(cards_html, height=600, scrolling=False)
 
     st.markdown("---")
   
