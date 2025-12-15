@@ -499,24 +499,23 @@ with tab_volta:
     # =========================
     # KPI 카드 영역
     # =========================
-    st.markdown("### 🏅 Volta 개인 기록 명예의 전당")
 
     k1, k2, k3 = st.columns(3)
 
     k1.metric(
-        "🥅 최다 득점자",
+        "최다 득점자",
         top_goal_name,
         f"{top_goal_val} 골" if top_goal_val != "-" else "집계 중"
     )
 
     k2.metric(
-        "🎯 최다 도움자",
+        "최다 도움자",
         top_assist_name,
         f"{top_assist_val} 도움" if top_assist_val != "-" else "집계 중"
     )
 
     k3.metric(
-        "⭐ 최고 평점자",
+        "최고 평점자",
         top_rating_name,
         f"{top_rating_val}" if top_rating_val != "-" else "집계 중"
     )
