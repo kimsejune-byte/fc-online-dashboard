@@ -458,7 +458,9 @@ with tab_compare:
 
 # ---------- 탭 3: 볼타 공식 ----------
 with tab_volta:
-    st.subheader("⚡ 볼타 공식경기 개인별 성적")
+    st.subheader("볼타 공식경기 개인별 성적")
+    st.caption("최근 50경기만 반영됩니다")
+
 
     try:
         volta_stats = calc_volta_stats()
@@ -520,7 +522,7 @@ with tab_volta:
 
 # ---------- 탭 4: 경기 리스트 ----------
 with tab_matches:
-    st.subheader("경기 리스트")
+    st.subheader("RAW DATA 1vs1 worldcup")
     view = filtered.copy()
     view = view.sort_values("date", ascending=False)
     view["date_str"] = view["date"].dt.strftime("%Y-%m-%d %H:%M")
