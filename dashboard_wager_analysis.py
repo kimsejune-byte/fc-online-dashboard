@@ -285,6 +285,7 @@ tab_overview, tab_compare, tab_volta, tab_matches = st.tabs(
 # 🏆 1vs1 공식경기 명예의 전당
 # ----------------------------------------
 
+
 with tab_overview:
 
     st.markdown("## 🏆 1vs1 공식경기 명예의 전당 Presented by Sejune inc.")
@@ -302,7 +303,6 @@ with tab_overview:
 
     # -------------------------------
     # 티어 → 아이콘 경로
-    # (FC 온라인 실제 표기 기준)
     # -------------------------------
     def get_tier_icon_path(name: str):
         if "챔피언스" in name:
@@ -335,74 +335,95 @@ with tab_overview:
             return "#8a5cff"
         if "프로" in name:
             return "#f5b041"
-        return "#1f77b4"
+        return "#5f6368"  # 기록 없음
 
     # -------------------------------
     # 데이터 없을 경우
     # -------------------------------
     if max_division_df.empty:
         st.info("최고 공식경기 등급 데이터를 불러올 수 없습니다.")
-    else:
-        # division_code 낮을수록 상위 티어
-        hall_df = (
-            max_division_df
-            .sort_values("division_code", ascending=True)
-            .reset_index(drop=True)
+        st.stop()
+
+    # -------------------------------
+    # 공식경기 보유 여부 + 정렬
+    # -------------------------------
+    max_division_df["has_official"] = max_division_df["division_code"] != 999
+
+    hall_df = (
+        max_division_df
+        .sort_values(
+            by=["has_official", "division_code"],
+            ascending=[False, True]
         )
+        .reset_index(drop=True)
+    )
 
-        cards_html = ""
+    # -------------------------------
+    # 카드 렌더링
+    # -------------------------------
+    cards_html = ""
+    official_rank = 0
 
-        for rank, row in hall_df.iterrows():
-            color = get_tier_color(row["division_name"])
+    for _, row in hall_df.iterrows():
 
-            icon_path = get_tier_icon_path(row["division_name"])
-            icon_base64 = image_to_base64(icon_path)
+        # 랭킹 표시
+        if row["division_code"] == 999:
+            rank_label = "#NULL"
+        else:
+            official_rank += 1
+            rank_label = f"#{official_rank}"
 
-            icon_html = ""
-            if icon_base64:
-                icon_html = f"""
-                <img src="{icon_base64}"
-                    width="56"
-                    style="margin-right:16px;">
-                """
+        color = get_tier_color(row["division_name"])
 
-            cards_html += f"""
-            <div style="
-                background:#0e1117;
-                border-left:6px solid {color};
-                padding:16px;
-                margin-bottom:14px;
-                border-radius:14px;
-                box-shadow:0 0 10px rgba(0,0,0,.4);
-                transition:transform .2s, box-shadow .2s;
-            " onmouseover="
-                this.style.transform='scale(1.02)';
-                this.style.boxShadow='0 0 18px rgba(255,255,255,0.15)';
-            "
-            onmouseout="
-                this.style.transform='scale(1)';
-                this.style.boxShadow='0 0 10px rgba(0,0,0,.4)';
-            ">
-                <div style="display:flex;align-items:center;">
-                    {icon_html}
-                    <div>
-                        <div style="color:white;font-weight:700;font-size:16px;">
-                            #{rank + 1} {row['nickname']}
-                        </div>
-                        <div style="color:{color};font-weight:700;">
-                            {row['division_name']}
-                        </div>
-                        <div style="color:#9aa0a6;font-size:12px;">
-                            달성일: {row['achievementDate'] or "N/A"}
-                        </div>
+        icon_path = get_tier_icon_path(row["division_name"])
+        icon_base64 = image_to_base64(icon_path)
+
+        icon_html = ""
+        if icon_base64:
+            icon_html = f"""
+            <img src="{icon_base64}"
+                width="56"
+                style="margin-right:16px;">
+            """
+
+        cards_html += f"""
+        <div style="
+            background:#0e1117;
+            border-left:6px solid {color};
+            padding:16px;
+            margin-bottom:14px;
+            border-radius:14px;
+            box-shadow:0 0 10px rgba(0,0,0,.4);
+            transition:transform .2s, box-shadow .2s;
+        " onmouseover="
+            this.style.transform='scale(1.02)';
+            this.style.boxShadow='0 0 18px rgba(255,255,255,0.15)';
+        "
+        onmouseout="
+            this.style.transform='scale(1)';
+            this.style.boxShadow='0 0 10px rgba(0,0,0,.4)';
+        ">
+            <div style="display:flex;align-items:center;">
+                {icon_html}
+                <div>
+                    <div style="color:white;font-weight:700;font-size:16px;">
+                        {rank_label} {row['nickname']}
+                    </div>
+                    <div style="color:{color};font-weight:700;">
+                        {row['division_name']}
+                    </div>
+                    <div style="color:#9aa0a6;font-size:12px;">
+                        달성일: {row['achievementDate']}
                     </div>
                 </div>
             </div>
-            """
+        </div>
+        """
 
-        components.html(cards_html, height=600, scrolling=False)
+    components.html(cards_html, height=520, scrolling=False)
 
     st.markdown("---")
+
   
     # =============================
     # 요약 테이블
