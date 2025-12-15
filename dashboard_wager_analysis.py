@@ -172,50 +172,7 @@ data["nickname"] = data["ouid"].map(nickname_map).fillna(data["ouid"])
 
 data["date"] = pd.to_datetime(data["date"], errors="coerce")
 
-# ================================
-#  2. 🔍 사이드바 필터
-# ================================
-st.sidebar.header("필터")
-
-all_nicknames = sorted(data["nickname"].unique().tolist())
-selected_nicknames = st.sidebar.multiselect(
-    "유저 선택",
-    options=all_nicknames,
-    default=all_nicknames
-)
-
-min_date = data["date"].min()
-max_date = data["date"].max()
-
-dr = st.sidebar.date_input(
-    "경기 날짜 범위",
-    value=(min_date.date(), max_date.date()),
-    min_value=min_date.date(),
-    max_value=max_date.date(),
-)
-
-start_date, end_date = dr
-
-result_options = sorted(data["matchResult"].dropna().unique().tolist())
-selected_results = st.sidebar.multiselect(
-    "경기 결과 필터",
-    options=result_options,
-    default=result_options,
-)
-
-# 필터링
 filtered = data.copy()
-filtered = filtered[filtered["nickname"].isin(selected_nicknames)]
-filtered = filtered[(filtered["date"].dt.date >= start_date) & (filtered["date"].dt.date <= end_date)]
-filtered = filtered[filtered["matchResult"].isin(selected_results)]
-
-st.sidebar.markdown("---")
-st.sidebar.write(f" 현재 필터 내기 경기 수: **{filtered['matchId'].nunique()} 경기**")
-
-if filtered.empty:
-    st.warning("⚠️ 필터 조건에 해당하는 데이터가 없습니다.")
-    st.stop()
-
 
 # ================================
 #  3. 요약 통계 계산
