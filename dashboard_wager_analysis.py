@@ -251,27 +251,33 @@ max_division_df = base_df.merge(
 )
 
 # 공식경기 없는 유저 처리
-max_division_df["division_name"] = max_division_df["division_name"].fillna("공식경기 기록 없음")
+max_division_df["division_name"] = max_division_df["division_name"].fillna("새가슴 issue로 공식경기 기록 없음")
 max_division_df["division_code"] = max_division_df["division_code"].fillna(999)
 max_division_df["achievementDate"] = max_division_df["achievementDate"].fillna("N/A")
 
-
 # ================================
-#  상단 KPI
+#  월드컵 KPI
 # ================================
-total_matches = filtered["matchId"].nunique()
-total_goals = filtered["goals"].sum()
+WORLD_CUP_FIRST_WINNER = "들을엉"
+WORLD_CUP_RECENT_WINNER = None
+WORLD_CUP_MOST_WINNER = None
 
-avg_goals_per_game = total_goals / total_matches
-avg_shots_per_game = filtered["shots"].sum() / total_matches
-avg_possession_overall = filtered["possession"].mean()
+k1, k2, k3 = st.columns(3)
 
-kpi1, kpi2, kpi3, kpi4 = st.columns(4)
-kpi1.metric("총 내기 경기 수", f"{total_matches} 경기")
-kpi2.metric("경기당 평균 득점", f"{avg_goals_per_game:.2f} 골")
-kpi3.metric("경기당 평균 슈팅", f"{avg_shots_per_game:.2f} 회")
-kpi4.metric("평균 점유율", f"{avg_possession_overall:.1f} %")
+k1.metric(
+    label="🏆 월드컵 초대 우승자",
+    value=WORLD_CUP_FIRST_WINNER
+)
 
+k2.metric(
+    label="🥇 최근 월드컵 우승자",
+    value=WORLD_CUP_RECENT_WINNER or "미정 (26년도 개최)"
+)
+
+k3.metric(
+    label="👑 최다 월드컵 우승자",
+    value=WORLD_CUP_MOST_WINNER or "미정 (26년도 개최)"
+)
 
 # ================================
 #  탭 구성
