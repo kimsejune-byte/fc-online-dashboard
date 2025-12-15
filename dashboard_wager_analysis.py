@@ -289,6 +289,8 @@ tab_overview, tab_compare, tab_volta, tab_matches = st.tabs(
 with tab_overview:
 
     st.markdown("## 🏆 1vs1 공식경기 명예의 전당 Presented by Sejune inc.")
+    st.caption("공식경기 기록이 없는 유저는 증명사진으로 대체됩니다")
+
 
     TIER_ICON_DIR = BASE_DIR / "assets" / "tier_icons"
 
