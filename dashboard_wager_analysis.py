@@ -288,8 +288,6 @@ tab_overview, tab_compare, tab_volta, tab_matches = st.tabs(
 
 
 # ---------- 탭 1: 공경 명예의 전장 ----------
-
-
 with tab_overview:
 
     st.markdown("## 🏆 1vs1 공식경기 명예의 전당 Presented by Sejune inc.")
@@ -444,8 +442,6 @@ with tab_overview:
     st.subheader(" 유저별 요약 통계")
     st.dataframe(summary, use_container_width=True)
 
-
-
 # ---------- 탭 2: 유저 비교 ----------
 with tab_compare:
     st.subheader(" 유저 1:1 비교 (VS 분석)")
@@ -473,9 +469,8 @@ with tab_compare:
 
 # ---------- 탭 3: 볼타 공식 ----------
 with tab_volta:
-    st.subheader("볼타 공식경기 개인별 성적")
-    st.caption("최근 50경기만 반영됩니다")
-
+    st.subheader("Volta 공식경기 명예의 전당 Presented by Goyang city")
+    st.caption("최대 50경기 누적 공식경기 기준 (자동 업데이트)")
 
     try:
         volta_stats = calc_volta_stats()
@@ -488,10 +483,53 @@ with tab_volta:
         st.info("표시할 볼타 공식경기 데이터가 없습니다.")
         st.stop()
 
-    # 컬럼 정리
-    volta_df = volta_df[
-        ["nickname", "games", "win", "draw", "lose", "win_rate"]
-    ].rename(columns={
+    # =========================
+    # KPI 계산 (안전 처리)
+    # =========================
+    def safe_top(df, col):
+        if col in df.columns and not df[col].isna().all():
+            row = df.sort_values(col, ascending=False).iloc[0]
+            return row["nickname"], row[col]
+        return "집계 중", "-"
+
+    top_goal_name, top_goal_val = safe_top(volta_df, "goal")
+    top_assist_name, top_assist_val = safe_top(volta_df, "assist")
+    top_rating_name, top_rating_val = safe_top(volta_df, "rating")
+
+    # =========================
+    # KPI 카드 영역
+    # =========================
+    st.markdown("### 🏅 Volta 개인 기록 명예의 전당")
+
+    k1, k2, k3 = st.columns(3)
+
+    k1.metric(
+        "🥅 최다 득점자",
+        top_goal_name,
+        f"{top_goal_val} 골" if top_goal_val != "-" else "집계 중"
+    )
+
+    k2.metric(
+        "🎯 최다 도움자",
+        top_assist_name,
+        f"{top_assist_val} 도움" if top_assist_val != "-" else "집계 중"
+    )
+
+    k3.metric(
+        "⭐ 최고 평점자",
+        top_rating_name,
+        f"{top_rating_val}" if top_rating_val != "-" else "집계 중"
+    )
+
+    st.markdown("---")
+
+    # =========================
+    # 테이블용 컬럼 정리
+    # =========================
+    table_cols = ["nickname", "games", "win", "draw", "lose", "win_rate"]
+    existing_cols = [c for c in table_cols if c in volta_df.columns]
+
+    volta_df = volta_df[existing_cols].rename(columns={
         "nickname": "닉네임",
         "games": "경기 수",
         "win": "승",
@@ -500,35 +538,14 @@ with tab_volta:
         "win_rate": "승률(%)"
     })
 
+    volta_df["승률(%)"] = volta_df["승률(%)"].round(1)
+
     # 승률 기준 정렬
     volta_df = volta_df.sort_values("승률(%)", ascending=False)
 
-    # -------------------
-    # KPI
-    # -------------------
-    c1, c2, c3 = st.columns(3)
-
-    c1.metric(
-        "최고 승률",
-        f"{volta_df.iloc[0]['승률(%)']}%",
-        f"{volta_df.iloc[0]['닉네임']}"
-    )
-
-    c2.metric(
-        "평균 승률",
-        f"{volta_df['승률(%)'].mean():.1f}%"
-    )
-
-    c3.metric(
-        "총 경기 수",
-        f"{volta_df['경기 수'].sum()} 경기"
-    )
-
-    st.markdown("---")
-
-    # -------------------
-    # 테이블
-    # -------------------
+    # =========================
+    # 테이블 출력
+    # =========================
     st.dataframe(
         volta_df,
         use_container_width=True,
