@@ -198,10 +198,21 @@ summary["win_rate"] = summary["wins"] / summary["games_played"] * 100
 # ================================
 #  유저별 최고 공식경기 등급 조회
 # ================================
+
+OUR_OUID_MAP = {
+    "40260d503f67f41c85ad1fbb6bf97fae": "들을엉",
+    "2fe7767c06e059a2593e2ec5747ca28b": "희미한연기",
+    "970686025f32d1af9205cb93cce0ed0e": "호랑이소굴로들가",
+    "abdee2cf7166a82cc746fe903ba131d9": "서울의환호",
+    "8ae71939629a719da141318475d8f1da": "서울시마포구",
+    "6fcf2b3f3ac52bf388e3cc9a1bba1f68": "200000000"
+}
+
 division_meta = load_division_meta()
 nickname_to_ouid = {nick: ouid for ouid, nick in nickname_map.items()}
 
 max_division_rows = []
+
 for nick in summary["nickname"]:
     ouid = nickname_to_ouid.get(nick)
     if not ouid:
@@ -221,11 +232,28 @@ for nick in summary["nickname"]:
         "achievementDate": info.get("achievementDate")
     })
 
-# (⭐ 핵심) DF가 없으면 빈 df 생성
-max_division_df = pd.DataFrame(
+    # 고정 6명 기준 DF
+base_df = pd.DataFrame({
+    "nickname": list(OUR_OUID_MAP.values())
+})
+
+# 공식경기 기록 DF
+division_df = pd.DataFrame(
     max_division_rows,
     columns=["nickname", "division_code", "division_name", "achievementDate"]
 )
+
+# LEFT JOIN → 6명 고정
+max_division_df = base_df.merge(
+    division_df,
+    on="nickname",
+    how="left"
+)
+
+# 공식경기 없는 유저 처리
+max_division_df["division_name"] = max_division_df["division_name"].fillna("공식경기 기록 없음")
+max_division_df["division_code"] = max_division_df["division_code"].fillna(999)
+max_division_df["achievementDate"] = max_division_df["achievementDate"].fillna("N/A")
 
 
 # ================================
@@ -259,10 +287,6 @@ tab_overview, tab_compare, tab_volta, tab_matches = st.tabs(
 
 with tab_overview:
 
-
-# ======================================================
-# 🏆 1vs1 공식경기 명예의 전당
-# ======================================================
     st.markdown("## 🏆 1vs1 공식경기 명예의 전당 Presented by Sejune inc.")
 
     TIER_ICON_DIR = BASE_DIR / "assets" / "tier_icons"
