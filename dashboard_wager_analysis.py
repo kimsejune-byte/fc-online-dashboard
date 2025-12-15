@@ -292,7 +292,7 @@ kpi4.metric("평균 점유율", f"{avg_possession_overall:.1f} %")
 #  탭 구성
 # ================================
 tab_overview, tab_compare, tab_volta, tab_matches = st.tabs(
-    [" 1vs1 공식경기 등급", " 유저 1vs1 비교", " Volta 공식경기 등급", " 경기 리스트"]
+    [" 1vs1 공식경기 등급", " 유저 1vs1 비교", " Volta 공식경기 등급", " Raw Data"]
 )
 
 # ---------- 탭 1 ----------
