@@ -251,7 +251,7 @@ max_division_df = base_df.merge(
 )
 
 # 공식경기 없는 유저 처리
-max_division_df["division_name"] = max_division_df["division_name"].fillna("새가슴 issue로 공식경기 기록 없음")
+max_division_df["division_name"] = max_division_df["division_name"].fillna("공식경기 기록 없음")
 max_division_df["division_code"] = max_division_df["division_code"].fillna(999)
 max_division_df["achievementDate"] = max_division_df["achievementDate"].fillna("N/A")
 
@@ -265,7 +265,7 @@ WORLD_CUP_MOST_WINNER = None
 k1, k2, k3 = st.columns(3)
 
 k1.metric(
-    label="🏆 월드컵 초대 우승자",
+    label="🏆 월드컵 초대 우승자 & 웹 개발자",
     value=WORLD_CUP_FIRST_WINNER
 )
 
@@ -286,10 +286,8 @@ tab_overview, tab_compare, tab_volta, tab_matches = st.tabs(
     [" 1vs1 공식경기 등급", " 유저 1vs1 비교", " Volta 공식경기 등급", " Raw Data"]
 )
 
-# ---------- 탭 1 ----------
-# ----------------------------------------
-# 🏆 1vs1 공식경기 명예의 전당
-# ----------------------------------------
+
+# ---------- 탭 1: 공경 명예의 전장 ----------
 
 
 with tab_overview:
