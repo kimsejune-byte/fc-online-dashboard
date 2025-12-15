@@ -1,4 +1,5 @@
 from pathlib import Path
+from volta_stats import calc_volta_stats
 import streamlit as st
 import streamlit.components.v1 as components
 import base64
@@ -17,10 +18,13 @@ API_KEY = "live_7a611a04eeb1ac043f43a92245935f274608d65acac4fcb584f1baad81aa8bd7
 HEADERS = {"x-nxopen-api-key": API_KEY}
 
 # OS별 BASE_DIR (세준 환경 기준)
-#if platform.system() == "Windows":
-#    BASE_DIR = Path("C:/Users/junab/OneDrive/py/FC ONLINE")
-#else:
-#    BASE_DIR = Path("/Users/kimsejune/OneDrive/py/FC ONLINE")
+
+'''
+if platform.system() == "Windows":
+    BASE_DIR = Path("C:/Users/junab/OneDrive/py/FC ONLINE")
+else:
+    BASE_DIR = Path("/Users/kimsejune/OneDrive/py/FC ONLINE")
+'''
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -287,8 +291,8 @@ kpi4.metric("평균 점유율", f"{avg_possession_overall:.1f} %")
 # ================================
 #  탭 구성
 # ================================
-tab_overview, tab_compare, tab_matches = st.tabs(
-    [" 전체 요약", " 유저 1:1 비교", " 경기 리스트"]
+tab_overview, tab_compare, tab_volta, tab_matches = st.tabs(
+    [" 1vs1 공식경기 등급", " 유저 1vs1 비교", " Volta 공식경기 등급", " 경기 리스트"]
 )
 
 # ---------- 탭 1 ----------
@@ -452,8 +456,69 @@ with tab_compare:
         comp = filtered[filtered["nickname"].isin([user1, user2])]
         st.dataframe(comp, use_container_width=True)
 
+# ---------- 탭 3: 볼타 공식 ----------
+with tab_volta:
+    st.subheader("⚡ 볼타 공식경기 개인별 성적")
 
-# ---------- 탭 3: 경기 리스트 ----------
+    try:
+        volta_stats = calc_volta_stats()
+        volta_df = pd.DataFrame(volta_stats)
+    except FileNotFoundError:
+        st.error("❌ volta_matches.json 파일이 없습니다. 먼저 volta_run.py를 실행하세요.")
+        st.stop()
+
+    if volta_df.empty:
+        st.info("표시할 볼타 공식경기 데이터가 없습니다.")
+        st.stop()
+
+    # 컬럼 정리
+    volta_df = volta_df[
+        ["nickname", "games", "win", "draw", "lose", "win_rate"]
+    ].rename(columns={
+        "nickname": "닉네임",
+        "games": "경기 수",
+        "win": "승",
+        "draw": "무",
+        "lose": "패",
+        "win_rate": "승률(%)"
+    })
+
+    # 승률 기준 정렬
+    volta_df = volta_df.sort_values("승률(%)", ascending=False)
+
+    # -------------------
+    # KPI
+    # -------------------
+    c1, c2, c3 = st.columns(3)
+
+    c1.metric(
+        "최고 승률",
+        f"{volta_df.iloc[0]['승률(%)']}%",
+        f"{volta_df.iloc[0]['닉네임']}"
+    )
+
+    c2.metric(
+        "평균 승률",
+        f"{volta_df['승률(%)'].mean():.1f}%"
+    )
+
+    c3.metric(
+        "총 경기 수",
+        f"{volta_df['경기 수'].sum()} 경기"
+    )
+
+    st.markdown("---")
+
+    # -------------------
+    # 테이블
+    # -------------------
+    st.dataframe(
+        volta_df,
+        use_container_width=True,
+        hide_index=True
+    )
+
+# ---------- 탭 4: 경기 리스트 ----------
 with tab_matches:
     st.subheader("경기 리스트")
     view = filtered.copy()
