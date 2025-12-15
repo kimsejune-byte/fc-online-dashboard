@@ -304,7 +304,14 @@ with tab_overview:
     # -------------------------------
     # 티어 → 아이콘 경로
     # -------------------------------
-    def get_tier_icon_path(name: str):
+    def get_tier_icon_path(name: str, nickname: str = None):
+        if name == "공식경기 기록 없음":
+            if nickname == "희미한연기":
+                return TIER_ICON_DIR / "no.jpg"
+            if nickname == "호랑이소굴로들가":
+                return TIER_ICON_DIR / "ahn.jpg"
+            return None  # 혹시 모를 예외
+    
         if "챔피언스" in name:
             return TIER_ICON_DIR / "champions.png"
         if "슈퍼챌린지" in name:
@@ -375,7 +382,7 @@ with tab_overview:
 
         color = get_tier_color(row["division_name"])
 
-        icon_path = get_tier_icon_path(row["division_name"])
+        icon_path = get_tier_icon_path(row["division_name"],row["nickname"])
         icon_base64 = image_to_base64(icon_path)
 
         icon_html = ""
