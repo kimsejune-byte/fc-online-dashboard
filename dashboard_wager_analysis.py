@@ -290,7 +290,7 @@ tab_overview, tab_compare, tab_volta, tab_matches = st.tabs(
 # ---------- 탭 1: 공경 명예의 전장 ----------
 with tab_overview:
 
-    st.markdown("## 🏆 1vs1 공식경기 명예의 전당 Presented by Sejune inc.")
+    st.subheader("## 🏆 1vs1 공식경기 명예의 전당 Presented by Sejune inc.")
     st.caption("공식경기 기록이 없는 유저는 증명사진으로 대체됩니다")
 
 
