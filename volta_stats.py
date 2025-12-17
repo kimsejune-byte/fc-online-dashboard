@@ -3,24 +3,18 @@ import json
 from collections import defaultdict
 from pathlib import Path
 
-# ==============================
-# 경로 설정
-# ==============================
 BASE_DIR = Path(__file__).resolve().parent
 VOLTA_JSON_PATH = BASE_DIR / "volta_matches.json"
 
+MIN_GAMES = 5  # 최소 경기수 필터 (원하면 1로 낮춰도 됨)
 
-# ==============================
-# 메인 스탯 계산 함수
-# ==============================
+
 def calc_volta_stats():
-    if not VOLTA_JSON_PATH.exists():
-        raise FileNotFoundError("volta_matches.json 파일이 없습니다.")
-
     with open(VOLTA_JSON_PATH, "r", encoding="utf-8") as f:
         matches = json.load(f)
 
     stats = defaultdict(lambda: {
+        "ouid": "",
         "nickname": "",
         "games": 0,
         "win": 0,
@@ -29,20 +23,21 @@ def calc_volta_stats():
         "goal": 0,
         "assist": 0,
         "block": 0,
-        "rating_sum": 0.0
+        "rating_sum": 0.0,
     })
 
-    # ------------------------------
-    # match 단위 집계
-    # ------------------------------
+    # ======================
+    # 집계
+    # ======================
     for m in matches:
         ouid = m["ouid"]
         s = stats[ouid]
 
+        s["ouid"] = ouid
         s["nickname"] = m["nickname"]
         s["games"] += 1
 
-        # 승무패
+        # 승/무/패
         if m["matchResult"] == "승":
             s["win"] += 1
         elif m["matchResult"] == "무":
@@ -50,70 +45,67 @@ def calc_volta_stats():
         elif m["matchResult"] == "패":
             s["lose"] += 1
 
-        # 누적 스탯
-        s["goal"] += m.get("goal", 0)
-        s["assist"] += m.get("assist", 0)
-        s["block"] += m.get("block", 0)
-        s["rating_sum"] += m.get("rating", 0.0)
+        # KPI 누적
+        s["goal"] += m.get("goal", 0) or 0
+        s["assist"] += m.get("assist", 0) or 0
+        s["block"] += m.get("block", 0) or 0
+        s["rating_sum"] += m.get("rating", 0.0) or 0.0
 
-    # ------------------------------
-    # 결과 정리
-    # ------------------------------
+    # ======================
+    # 평균 KPI 계산
+    # ======================
     result = []
-
-    for ouid, s in stats.items():
+    for s in stats.values():
         games = s["games"]
-        avg_rating = round(s["rating_sum"] / games, 2) if games > 0 else 0.0
-        win_rate = round(s["win"] / games * 100, 1) if games > 0 else 0.0
+        if games < MIN_GAMES:
+            continue
 
         result.append({
-            "ouid": ouid,
+            "ouid": s["ouid"],
             "nickname": s["nickname"],
             "games": games,
             "win": s["win"],
             "draw": s["draw"],
             "lose": s["lose"],
-            "win_rate": win_rate,
+            "win_rate": round(s["win"] / games * 100, 1),
+
+            # 총합
             "goal": s["goal"],
             "assist": s["assist"],
             "block": s["block"],
-            "avg_rating": avg_rating
+
+            # ✅ 평균 KPI (핵심)
+            "avg_goal": round(s["goal"] / games, 2),
+            "avg_assist": round(s["assist"] / games, 2),
+            "avg_block": round(s["block"] / games, 2),
+            "avg_rating": round(s["rating_sum"] / games, 2),
         })
 
     return result
 
 
-# ==============================
-# 랭킹 계산 함수들
-# ==============================
-def get_top_goal(stats):
-    return max(stats, key=lambda x: x["goal"])
+def select_kings(stats):
+    return {
+        "goal_king": max(stats, key=lambda x: x["avg_goal"]),
+        "assist_king": max(stats, key=lambda x: x["avg_assist"]),
+        "block_king": max(stats, key=lambda x: x["avg_block"]),
+        "mvp": max(stats, key=lambda x: x["avg_rating"]),
+    }
 
 
-def get_top_assist(stats):
-    return max(stats, key=lambda x: x["assist"])
-
-
-def get_top_block(stats):
-    return max(stats, key=lambda x: x["block"])
-
-
-def get_mvp(stats, min_games=5):
-    filtered = [s for s in stats if s["games"] >= min_games]
-    return max(filtered, key=lambda x: x["avg_rating"]) if filtered else None
-
-
-# ==============================
-# 터미널 테스트
-# ==============================
+# ======================
+# 터미널 실행용
+# ======================
 if __name__ == "__main__":
     stats = calc_volta_stats()
+    kings = select_kings(stats)
 
-    print("📊 볼타 개인별 스탯")
-    for s in stats:
+    print("\n📊 개인별 볼타 평균 스탯")
+    for s in sorted(stats, key=lambda x: x["win_rate"], reverse=True):
         print(s)
 
-    print("\n🥅 득점왕:", get_top_goal(stats))
-    print("🎯 도움왕:", get_top_assist(stats))
-    print("🛡 차단왕:", get_top_block(stats))
-    print("⭐ MVP:", get_mvp(stats))
+    print("\n👑 타이틀")
+    print("🥅 득점왕:", kings["goal_king"]["nickname"], f"(경기당 {kings['goal_king']['avg_goal']})")
+    print("🎯 도움왕:", kings["assist_king"]["nickname"], f"(경기당 {kings['assist_king']['avg_assist']})")
+    print("🛡 차단왕:", kings["block_king"]["nickname"], f"(경기당 {kings['block_king']['avg_block']})")
+    print("⭐ MVP:", kings["mvp"]["nickname"], f"(평균 평점 {kings['mvp']['avg_rating']})")

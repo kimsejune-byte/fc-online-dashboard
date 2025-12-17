@@ -1,22 +1,24 @@
 # volta_run.py
-from pathlib import Path
-import json
 import requests
-from datetime import datetime, timezone, timedelta
+import json
+from pathlib import Path
+from tqdm import tqdm
 
 # ==============================
 # 기본 설정
 # ==============================
-BASE_DIR = Path(__file__).resolve().parent
-VOLTA_JSON_PATH = BASE_DIR / "volta_matches.json"
-
 API_KEY = "live_7a611a04eeb1ac043f43a92245935f274608d65acac4fcb584f1baad81aa8bd7efe8d04e6d233bd35cf2fabdeb93fb0d"
 HEADERS = {"x-nxopen-api-key": API_KEY}
 
-KST = timezone(timedelta(hours=9))
+BASE_DIR = Path(__file__).resolve().parent
+OUTPUT_PATH = BASE_DIR / "volta_matches.json"
 
-# 우리 고정 6명 (ouid → nickname)
-OUR_OUID_MAP = {
+MATCH_TYPE_VOLTA = 214
+
+# ==============================
+# 우리 멤버
+# ==============================
+OUR_PLAYERS = {
     "40260d503f67f41c85ad1fbb6bf97fae": "들을엉",
     "2fe7767c06e059a2593e2ec5747ca28b": "희미한연기",
     "970686025f32d1af9205cb93cce0ed0e": "호랑이소굴로들가",
@@ -24,95 +26,107 @@ OUR_OUID_MAP = {
     "8ae71939629a719da141318475d8f1da": "서울시마포구",
     "6fcf2b3f3ac52bf388e3cc9a1bba1f68": "200000000",
 }
+OUR_OUIDS = set(OUR_PLAYERS.keys())
 
-MATCH_TYPE_VOLTA_OFFICIAL = 214
-MATCH_LIMIT = 50  # 유저당 최근 N경기
+print("\n[INFO] OUR_OUIDS 준비 완료:")
+print(OUR_OUIDS)
 
 # ==============================
-# API 함수
+# API
 # ==============================
-def fetch_user_matches(ouid: str):
+def fetch_match_list(ouid):
     url = "https://open.api.nexon.com/fconline/v1/user/match"
     params = {
         "ouid": ouid,
-        "matchtype": MATCH_TYPE_VOLTA_OFFICIAL,
-        "limit": MATCH_LIMIT,
+        "matchtype": MATCH_TYPE_VOLTA,
+        "offset": 0,
+        "limit": 100
     }
-    res = requests.get(url, headers=HEADERS, params=params, timeout=5)
-    if res.status_code == 200:
-        return res.json()
-    return []
+    res = requests.get(url, headers=HEADERS, params=params)
+    return res.json() if res.status_code == 200 else []
 
-def fetch_match_detail(match_id: str):
+
+def fetch_match_detail(match_id):
     url = "https://open.api.nexon.com/fconline/v1/match-detail"
-    params = {"matchid": match_id}
-    res = requests.get(url, headers=HEADERS, params=params, timeout=5)
-    if res.status_code == 200:
-        return res.json()
-    return None
+    res = requests.get(url, headers=HEADERS, params={"matchid": match_id})
+    return res.json() if res.status_code == 200 else None
 
 # ==============================
-# 메인 수집 로직
+# 메인 수집
 # ==============================
 def collect_volta_matches():
-    # 기존 데이터 로드
-    if VOLTA_JSON_PATH.exists():
-        with open(VOLTA_JSON_PATH, "r", encoding="utf-8") as f:
-            saved = json.load(f)
+    if OUTPUT_PATH.exists():
+        saved = json.load(open(OUTPUT_PATH, encoding="utf-8"))
     else:
         saved = []
 
-    saved_keys = {
-        (m["matchId"], m["ouid"]) for m in saved
-    }
+    saved_keys = {(m["matchId"], m["ouid"]) for m in saved}
+
+    print("\n🔍 볼타 공식경기 matchId 수집 중...\n")
+
+    all_match_ids = set()
+    for ouid, name in OUR_PLAYERS.items():
+        print(f" - {name}")
+        all_match_ids.update(fetch_match_list(ouid))
+
+    print(f"\n🔎 전체 수집된 match 수: {len(all_match_ids)}")
 
     new_rows = []
 
-    for ouid, nickname in OUR_OUID_MAP.items():
-        print(f"🔍 {nickname} 볼타 공식경기 조회 중...")
-        match_ids = fetch_user_matches(ouid)
+    for match_id in tqdm(all_match_ids):
+        detail = fetch_match_detail(match_id)
+        if not detail:
+            continue
 
-        for match_id in match_ids:
+        match_date = detail.get("matchDate", "").split(".")[0]
+
+        for info in detail.get("matchInfo", []):
+            ouid = info.get("ouid")
+            if ouid not in OUR_OUIDS:
+                continue
+
             key = (match_id, ouid)
             if key in saved_keys:
                 continue
 
-            detail = fetch_match_detail(match_id)
-            if not detail:
-                continue
+            # ✅ 여기 중요
+            players = info.get("player", [])
+            goals = assists = blocks = 0
+            ratings = []
 
-            # 해당 유저의 matchInfo 찾기
-            player_info = None
-            for p in detail.get("matchInfo", []):
-                if p.get("ouid") == ouid:
-                    player_info = p
-                    break
+            for p in players:
+                status = p.get("status", {})
+                goals += status.get("goal", 0)
+                assists += status.get("assist", 0)
+                blocks += status.get("block", 0)
 
-            if not player_info:
-                continue
+                if status.get("spRating") is not None:
+                    ratings.append(status["spRating"])
 
-            match_result = player_info.get("matchDetail", {}).get("matchResult")
-            match_date = detail.get("matchDate")
+            avg_rating = round(sum(ratings) / len(ratings), 2) if ratings else 0.0
 
             new_rows.append({
                 "matchId": match_id,
                 "date": match_date,
-                "matchType": MATCH_TYPE_VOLTA_OFFICIAL,
+                "matchType": MATCH_TYPE_VOLTA,
                 "ouid": ouid,
-                "nickname": nickname,
-                "matchResult": match_result,
+                "nickname": OUR_PLAYERS[ouid],
+                "matchResult": info.get("matchDetail", {}).get("matchResult"),
+                "goal": goals,
+                "assist": assists,
+                "block": blocks,
+                "rating": avg_rating,
             })
 
     if new_rows:
         saved.extend(new_rows)
-        with open(VOLTA_JSON_PATH, "w", encoding="utf-8") as f:
-            json.dump(saved, f, ensure_ascii=False, indent=2)
+        json.dump(saved, open(OUTPUT_PATH, "w", encoding="utf-8"),
+                  ensure_ascii=False, indent=2)
 
-    return len(new_rows)
+    print(f"\n✅ 새로 저장된 볼타 공식경기: {len(new_rows)}개")
 
 # ==============================
-# 터미널 실행
+# 실행
 # ==============================
 if __name__ == "__main__":
-    count = collect_volta_matches()
-    print(f"\n✅ 새로 저장된 볼타 공식경기: {count}건")
+    collect_volta_matches()
