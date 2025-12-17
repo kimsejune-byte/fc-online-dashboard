@@ -444,7 +444,7 @@ with tab_overview:
 
 # ---------- 탭 2: 유저 비교 ----------
 with tab_compare:
-    st.subheader(" 유저 1:1 비교 (VS 분석)")
+    st.subheader(" 유저 1:1 비교")
 
     if len(summary) < 2:
         st.info("비교 가능한 유저가 2명 이상 필요합니다.")
@@ -470,8 +470,8 @@ with tab_compare:
 # ---------- 탭 3: 볼타 공식 ----------
 with tab_volta:
 
-    st.markdown("## ⚽ 볼타 공식경기 개인 분석")
-    st.caption("볼타 공식경기(214) 기준 · 누적 데이터")
+    st.subheader("Volta 공식경기 명예의 전당 Presented by Sejune inc.")
+    st.caption("최근 2개월, 50경기 기준입니다.")
 
     import json
     import pandas as pd
@@ -504,7 +504,7 @@ with tab_volta:
         df[c] = pd.to_numeric(df[c], errors="coerce").fillna(0)
 
     # =====================================================
-    # 📊 1. 개인별 누적 스탯
+    # 1. 개인별 누적 스탯
     # =====================================================
     stats_df = (
         df
@@ -525,52 +525,70 @@ with tab_volta:
     stats_df["avg_rating"] = stats_df["avg_rating"].round(2)
 
     # ------------------------------
-    # ⭐ 평균 스탯 (KPI용)
+    # 평균 스탯 (KPI용)
     # ------------------------------
+        
+    # ---------- 평균 스탯 계산 ----------
     stats_df["avg_goal"] = (stats_df["goal"] / stats_df["games"]).round(2)
     stats_df["avg_assist"] = (stats_df["assist"] / stats_df["games"]).round(2)
     stats_df["avg_block"] = (stats_df["block"] / stats_df["games"]).round(2)
 
-    # =====================================================
-    # 🏆 2. 상단 KPI (평균 기준 왕들)
-    # =====================================================
-    k1, k2, k3, k4 = st.columns(4)
+    # ---------- MVP / 패배범인 ----------
+    mvp = stats_df.sort_values("avg_rating", ascending=False).iloc[0]
+    loser = stats_df.sort_values("avg_rating", ascending=True).iloc[0]
 
+    # ---------- 평균 스탯 TOP ----------
     top_goal = stats_df.sort_values("avg_goal", ascending=False).iloc[0]
     top_assist = stats_df.sort_values("avg_assist", ascending=False).iloc[0]
     top_block = stats_df.sort_values("avg_block", ascending=False).iloc[0]
-    top_mvp = stats_df.sort_values("avg_rating", ascending=False).iloc[0]
+
+    # =====================================================
+    # 🥇 1줄 KPI : MVP / 패배 범인
+    # =====================================================
+    k1, k2 = st.columns(2)
 
     k1.metric(
-        "⚽ 평균 득점왕",
+        "⭐ 평점 MVP",
+        f"{mvp['avg_rating']}",
+        mvp["nickname"]
+    )
+
+    k2.metric(
+        "패배 요인 (평점 최저)",
+        f"{loser['avg_rating']}",
+        loser["nickname"]
+    )
+
+    # =====================================================
+    # ⚽ 2줄 KPI : 평균 득점 / 도움 / 차단
+    # =====================================================
+    k3, k4, k5 = st.columns(3)
+
+    k3.metric(
+        "평균 득점",
         f"{top_goal['avg_goal']}",
         top_goal["nickname"]
     )
 
-    k2.metric(
-        "🎯 평균 도움왕",
+    k4.metric(
+        "평균 도움",
         f"{top_assist['avg_assist']}",
         top_assist["nickname"]
     )
 
-    k3.metric(
-        "🛡 평균 차단왕",
+    k5.metric(
+        "평균 차단",
         f"{top_block['avg_block']}",
         top_block["nickname"]
     )
 
-    k4.metric(
-        "⭐ MVP (평점)",
-        f"{top_mvp['avg_rating']}",
-        top_mvp["nickname"]
-    )
-
     st.markdown("---")
+    
 
     # =====================================================
-    # 📋 3. 개인별 누적 스탯 테이블
+    # 3. 개인별 누적 스탯 테이블
     # =====================================================
-    st.subheader("📊 개인별 누적 성적")
+    st.subheader("개인별 누적 성적")
 
     stats_view = (
         stats_df[
