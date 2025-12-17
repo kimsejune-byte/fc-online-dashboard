@@ -469,88 +469,177 @@ with tab_compare:
 
 # ---------- 탭 3: 볼타 공식 ----------
 with tab_volta:
-    st.subheader("Volta 공식경기 명예의 전당 Presented by Goyang city")
-    st.caption("최대 50경기 누적 공식경기 기준 (자동 업데이트)")
 
-    try:
-        volta_stats = calc_volta_stats()
-        volta_df = pd.DataFrame(volta_stats)
-    except FileNotFoundError:
+    st.markdown("## ⚽ 볼타 공식경기 개인 분석")
+    st.caption("볼타 공식경기(214) 기준 · 누적 데이터")
+
+    import json
+    import pandas as pd
+    from pathlib import Path
+
+    BASE_DIR = Path(__file__).resolve().parent
+    VOLTA_JSON_PATH = BASE_DIR / "volta_matches.json"
+
+    # ------------------------------
+    # 데이터 로드
+    # ------------------------------
+    if not VOLTA_JSON_PATH.exists():
         st.error("❌ volta_matches.json 파일이 없습니다. 먼저 volta_run.py를 실행하세요.")
         st.stop()
 
-    if volta_df.empty:
+    raw = json.load(open(VOLTA_JSON_PATH, encoding="utf-8"))
+    df = pd.DataFrame(raw)
+
+    if df.empty:
         st.info("표시할 볼타 공식경기 데이터가 없습니다.")
         st.stop()
 
-    # =========================
-    # KPI 계산 (안전 처리)
-    # =========================
-    def safe_top(df, col):
-        if col in df.columns and not df[col].isna().all():
-            row = df.sort_values(col, ascending=False).iloc[0]
-            return row["nickname"], row[col]
-        return "집계 중", "-"
+    # ------------------------------
+    # 타입 정리
+    # ------------------------------
+    df["date"] = pd.to_datetime(df["date"])
 
-    top_goal_name, top_goal_val = safe_top(volta_df, "goal")
-    top_assist_name, top_assist_val = safe_top(volta_df, "assist")
-    top_rating_name, top_rating_val = safe_top(volta_df, "rating")
+    numeric_cols = ["goal", "assist", "block", "rating"]
+    for c in numeric_cols:
+        df[c] = pd.to_numeric(df[c], errors="coerce").fillna(0)
 
-    # =========================
-    # KPI 카드 영역
-    # =========================
+    # =====================================================
+    # 📊 1. 개인별 누적 스탯
+    # =====================================================
+    stats_df = (
+        df
+        .groupby(["ouid", "nickname"], as_index=False)
+        .agg(
+            games=("matchId", "count"),
+            win=("matchResult", lambda x: (x == "승").sum()),
+            draw=("matchResult", lambda x: (x == "무").sum()),
+            lose=("matchResult", lambda x: (x == "패").sum()),
+            goal=("goal", "sum"),
+            assist=("assist", "sum"),
+            block=("block", "sum"),
+            avg_rating=("rating", "mean"),
+        )
+    )
 
-    k1, k2, k3 = st.columns(3)
+    stats_df["win_rate"] = (stats_df["win"] / stats_df["games"] * 100).round(1)
+    stats_df["avg_rating"] = stats_df["avg_rating"].round(2)
+
+    # =====================================================
+    # 🏆 2. 상단 KPI (왕들)
+    # =====================================================
+    k1, k2, k3, k4 = st.columns(4)
+
+    top_goal = stats_df.sort_values("goal", ascending=False).iloc[0]
+    top_assist = stats_df.sort_values("assist", ascending=False).iloc[0]
+    top_block = stats_df.sort_values("block", ascending=False).iloc[0]
+    top_mvp = stats_df.sort_values("avg_rating", ascending=False).iloc[0]
 
     k1.metric(
-        "최다 득점자",
-        top_goal_name,
-        f"{top_goal_val} 골" if top_goal_val != "-" else "집계 중"
+        "🥅 득점왕",
+        f"{int(top_goal['goal'])} 골",
+        top_goal["nickname"]
     )
 
     k2.metric(
-        "최다 도움자",
-        top_assist_name,
-        f"{top_assist_val} 도움" if top_assist_val != "-" else "집계 중"
+        "🎯 도움왕",
+        f"{int(top_assist['assist'])} 도움",
+        top_assist["nickname"]
     )
 
     k3.metric(
-        "최고 평점자",
-        top_rating_name,
-        f"{top_rating_val}" if top_rating_val != "-" else "집계 중"
+        "🛡 차단왕",
+        f"{int(top_block['block'])} 회",
+        top_block["nickname"]
+    )
+
+    k4.metric(
+        "⭐ MVP (평점)",
+        f"{top_mvp['avg_rating']}",
+        top_mvp["nickname"]
     )
 
     st.markdown("---")
 
-    # =========================
-    # 테이블용 컬럼 정리
-    # =========================
-    table_cols = ["nickname", "games", "win", "draw", "lose", "win_rate"]
-    existing_cols = [c for c in table_cols if c in volta_df.columns]
+    # =====================================================
+    # 📋 3. 개인별 누적 스탯 테이블
+    # =====================================================
+    st.subheader("📊 개인별 누적 성적")
 
-    volta_df = volta_df[existing_cols].rename(columns={
+    stats_view = stats_df[
+        [
+            "nickname", "games", "win", "draw", "lose",
+            "win_rate", "goal", "assist", "block", "avg_rating"
+        ]
+    ].rename(columns={
         "nickname": "닉네임",
         "games": "경기 수",
         "win": "승",
         "draw": "무",
         "lose": "패",
-        "win_rate": "승률(%)"
-    })
+        "win_rate": "승률(%)",
+        "goal": "득점",
+        "assist": "도움",
+        "block": "차단",
+        "avg_rating": "평균 평점",
+    }).sort_values("승률(%)", ascending=False)
 
-    volta_df["승률(%)"] = volta_df["승률(%)"].round(1)
-
-    # 승률 기준 정렬
-    volta_df = volta_df.sort_values("승률(%)", ascending=False)
-
-    # =========================
-    # 테이블 출력
-    # =========================
     st.dataframe(
-        volta_df,
+        stats_view,
         use_container_width=True,
         hide_index=True
     )
 
+    st.markdown("---")
+
+    # =====================================================
+    # 📋 4. 개인별 상세 경기 테이블
+    # =====================================================
+    st.subheader("📋 개인별 상세 경기 기록")
+
+    all_names = sorted(df["nickname"].unique().tolist())
+    selected_name = st.selectbox(
+        "유저 선택",
+        all_names
+    )
+
+    detail_df = df[df["nickname"] == selected_name].copy()
+    detail_df = detail_df.sort_values("date", ascending=False)
+
+    # KPI (선택 유저 기준)
+    c1, c2, c3, c4 = st.columns(4)
+
+    c1.metric("경기 수", len(detail_df))
+    c2.metric("총 득점", int(detail_df["goal"].sum()))
+    c3.metric("총 도움", int(detail_df["assist"].sum()))
+    c4.metric(
+        "평균 평점",
+        round(detail_df["rating"].mean(), 2)
+        if detail_df["rating"].notna().any()
+        else "-"
+    )
+
+    st.markdown("#### 경기 상세")
+
+    detail_view = detail_df[
+        [
+            "date", "matchResult", "goal",
+            "assist", "block", "rating", "matchId"
+        ]
+    ].rename(columns={
+        "date": "경기일시",
+        "matchResult": "결과",
+        "goal": "득점",
+        "assist": "도움",
+        "block": "차단",
+        "rating": "평점",
+        "matchId": "매치 ID"
+    })
+
+    st.dataframe(
+        detail_view,
+        use_container_width=True,
+        hide_index=True
+    )
 # ---------- 탭 4: 경기 리스트 ----------
 with tab_matches:
     st.subheader("RAW DATA 1vs1 worldcup")
