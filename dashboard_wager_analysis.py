@@ -524,31 +524,38 @@ with tab_volta:
     stats_df["win_rate"] = (stats_df["win"] / stats_df["games"] * 100).round(1)
     stats_df["avg_rating"] = stats_df["avg_rating"].round(2)
 
+    # ------------------------------
+    # ⭐ 평균 스탯 (KPI용)
+    # ------------------------------
+    stats_df["avg_goal"] = (stats_df["goal"] / stats_df["games"]).round(2)
+    stats_df["avg_assist"] = (stats_df["assist"] / stats_df["games"]).round(2)
+    stats_df["avg_block"] = (stats_df["block"] / stats_df["games"]).round(2)
+
     # =====================================================
-    # 🏆 2. 상단 KPI (왕들)
+    # 🏆 2. 상단 KPI (평균 기준 왕들)
     # =====================================================
     k1, k2, k3, k4 = st.columns(4)
 
-    top_goal = stats_df.sort_values("goal", ascending=False).iloc[0]
-    top_assist = stats_df.sort_values("assist", ascending=False).iloc[0]
-    top_block = stats_df.sort_values("block", ascending=False).iloc[0]
+    top_goal = stats_df.sort_values("avg_goal", ascending=False).iloc[0]
+    top_assist = stats_df.sort_values("avg_assist", ascending=False).iloc[0]
+    top_block = stats_df.sort_values("avg_block", ascending=False).iloc[0]
     top_mvp = stats_df.sort_values("avg_rating", ascending=False).iloc[0]
 
     k1.metric(
-        "🥅 득점왕",
-        f"{int(top_goal['goal'])} 골",
+        "⚽ 평균 득점왕",
+        f"{top_goal['avg_goal']}",
         top_goal["nickname"]
     )
 
     k2.metric(
-        "🎯 도움왕",
-        f"{int(top_assist['assist'])} 도움",
+        "🎯 평균 도움왕",
+        f"{top_assist['avg_assist']}",
         top_assist["nickname"]
     )
 
     k3.metric(
-        "🛡 차단왕",
-        f"{int(top_block['block'])} 회",
+        "🛡 평균 차단왕",
+        f"{top_block['avg_block']}",
         top_block["nickname"]
     )
 
@@ -565,23 +572,27 @@ with tab_volta:
     # =====================================================
     st.subheader("📊 개인별 누적 성적")
 
-    stats_view = stats_df[
-        [
-            "nickname", "games", "win", "draw", "lose",
-            "win_rate", "goal", "assist", "block", "avg_rating"
+    stats_view = (
+        stats_df[
+            [
+                "nickname", "games", "win", "draw", "lose",
+                "win_rate", "goal", "assist", "block", "avg_rating"
+            ]
         ]
-    ].rename(columns={
-        "nickname": "닉네임",
-        "games": "경기 수",
-        "win": "승",
-        "draw": "무",
-        "lose": "패",
-        "win_rate": "승률(%)",
-        "goal": "득점",
-        "assist": "도움",
-        "block": "차단",
-        "avg_rating": "평균 평점",
-    }).sort_values("승률(%)", ascending=False)
+        .rename(columns={
+            "nickname": "닉네임",
+            "games": "경기 수",
+            "win": "승",
+            "draw": "무",
+            "lose": "패",
+            "win_rate": "승률(%)",
+            "goal": "득점",
+            "assist": "도움",
+            "block": "차단",
+            "avg_rating": "평균 평점",
+        })
+        .sort_values("승률(%)", ascending=False)
+    )
 
     st.dataframe(
         stats_view,
