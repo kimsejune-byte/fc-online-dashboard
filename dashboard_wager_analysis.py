@@ -152,7 +152,7 @@ if not raw_matches or not nickname_map:
 
 all_records = []
 
-with st.spinner("📥 내기 경기 상세정보 불러오는 중..."):
+with st.spinner("어차피 우승은 들을엉..."):
     for m in tqdm(raw_matches):
         match_id = m["matchId"]
         detail = fetch_match_detail(match_id)
@@ -270,12 +270,12 @@ k1.metric(
 )
 
 k2.metric(
-    label="🥇 최근 월드컵 우승자",
+    label="최근 월드컵 우승자",
     value=WORLD_CUP_RECENT_WINNER or "미정 (26년도 개최)"
 )
 
 k3.metric(
-    label="👑 최다 월드컵 우승자",
+    label="최다 월드컵 우승자",
     value=WORLD_CUP_MOST_WINNER or "미정 (26년도 개최)"
 )
 
@@ -676,6 +676,7 @@ with tab_volta:
         use_container_width=True,
         hide_index=True
     )
+
 # ---------- 탭 4: 경기 리스트 ----------
 with tab_matches:
     st.subheader("RAW DATA 1vs1 worldcup")
