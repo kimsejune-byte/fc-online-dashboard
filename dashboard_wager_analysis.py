@@ -283,7 +283,7 @@ k3.metric(
 #  탭 구성
 # ================================
 tab_overview, tab_compare, tab_volta, tab_matches = st.tabs(
-    [" 1vs1 공식경기 등급", " 유저 1vs1 비교", " Volta 공식경기 등급", " Raw Data"]
+    [" 1vs1 공식경기 등급", " 1vs1 공식경기 비교", " Volta 공식경기 지표", " Raw Data"]
 )
 
 
