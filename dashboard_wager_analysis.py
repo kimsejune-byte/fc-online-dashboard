@@ -283,7 +283,7 @@ k3.metric(
 #  탭 구성
 # ================================
 tab_overview, tab_compare, tab_volta, tab_matches = st.tabs(
-    [" 1vs1 공식경기 등급", " 1vs1 공식경기 비교", " Volta 공식경기 지표", " Raw Data"]
+    [" 1vs1 공식경기 등급", " 1vs1 월드컵 비교", " Volta 공식경기 지표", " Raw Data"]
 )
 
 
@@ -442,9 +442,10 @@ with tab_overview:
     st.subheader(" 유저별 요약 통계")
     st.dataframe(summary, use_container_width=True)
 
-# ---------- 탭 2: 유저 비교 ----------
+# ---------- 탭 2: 월드컵 유저 비교 ----------
 with tab_compare:
-    st.subheader(" 유저 1:1 비교")
+    st.subheader("월드컵 지표 비교")
+    st.caption("누가 더 잘했나 비교해봅시다.")
 
     if len(summary) < 2:
         st.info("비교 가능한 유저가 2명 이상 필요합니다.")
