@@ -535,6 +535,7 @@ with tab_volta:
 
     # ---------- MVP / 패배범인 ----------
     mvp = stats_df.sort_values("avg_rating", ascending=False).iloc[0]
+    win_king = stats_df.sort_values("win_rate", ascending=False).iloc[0]
     loser = stats_df.sort_values("avg_rating", ascending=True).iloc[0]
 
     # ---------- 평균 스탯 TOP ----------
@@ -545,7 +546,7 @@ with tab_volta:
     # =====================================================
     # 🥇 1줄 KPI : MVP / 패배 범인
     # =====================================================
-    k1, k2 = st.columns(2)
+    k1, k2, k3 = st.columns(2)
 
     k1.metric(
         "⭐ 평점 MVP",
@@ -554,6 +555,12 @@ with tab_volta:
     )
 
     k2.metric(
+        "승률 KING",
+        f"{win_king['win_rate']}",
+        win_king["nickname"]
+    )
+
+    k3.metric(
         "패배 요인 (평점 최저)",
         f"{loser['avg_rating']}",
         loser["nickname"]
@@ -562,21 +569,21 @@ with tab_volta:
     # =====================================================
     # ⚽ 2줄 KPI : 평균 득점 / 도움 / 차단
     # =====================================================
-    k3, k4, k5 = st.columns(3)
+    k4, k5, k6 = st.columns(3)
 
-    k3.metric(
+    k4.metric(
         "평균 득점",
         f"{top_goal['avg_goal']}",
         top_goal["nickname"]
     )
 
-    k4.metric(
+    k5.metric(
         "평균 도움",
         f"{top_assist['avg_assist']}",
         top_assist["nickname"]
     )
 
-    k5.metric(
+    k6.metric(
         "평균 차단",
         f"{top_block['avg_block']}",
         top_block["nickname"]
