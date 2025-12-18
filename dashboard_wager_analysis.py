@@ -551,19 +551,19 @@ with tab_volta:
 
     k1.metric(
         "⭐ 평점 MVP",
-        f"{mvp['avg_rating']}",
+        f"{mvp['avg_rating']}/10점",
         mvp["nickname"]
     )
 
     k2.metric(
         "승률 KING",
-        f"{win_king['win_rate']}",
+        f"{win_king['win_rate']}%",
         win_king["nickname"]
     )
 
     k3.metric(
         "패배 요인 (평점 최저)",
-        f"{loser['avg_rating']}",
+        f"{loser['avg_rating']}/10점",
         loser["nickname"]
     )
 
