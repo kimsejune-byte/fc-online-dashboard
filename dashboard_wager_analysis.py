@@ -435,13 +435,6 @@ with tab_overview:
 
     st.markdown("---")
 
-  
-    # =============================
-    # 요약 테이블
-    # =============================
-    st.subheader(" 유저별 요약 통계")
-    st.dataframe(summary, use_container_width=True)
-
 # ---------- 탭 2: 월드컵 유저 비교 ----------
 with tab_compare:
     st.subheader("월드컵 지표 비교")
