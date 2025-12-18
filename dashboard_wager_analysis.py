@@ -574,19 +574,19 @@ with tab_volta:
 
     k4.metric(
         "평균 득점",
-        f"{top_goal['avg_goal']}",
+        f"{top_goal['avg_goal']}회",
         top_goal["nickname"]
     )
 
     k5.metric(
         "평균 도움",
-        f"{top_assist['avg_assist']}",
+        f"{top_assist['avg_assist']}회",
         top_assist["nickname"]
     )
 
     k6.metric(
         "평균 차단",
-        f"{top_block['avg_block']}",
+        f"{top_block['avg_block']}회",
         top_block["nickname"]
     )
 
