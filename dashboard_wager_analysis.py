@@ -282,8 +282,8 @@ k3.metric(
 # ================================
 #  탭 구성
 # ================================
-tab_overview, tab_compare, tab_volta, tab_matches = st.tabs(
-    [" 1vs1 공식경기 등급", " 1vs1 월드컵 비교", " Volta 공식경기 지표", " Raw Data"]
+tab_overview, tab_compare, tab_volta, tab_matches, tab_about = st.tabs(
+    [" 1vs1 공식경기 등급", " 1vs1 월드컵 비교", " Volta 공식경기 지표", " Raw Data", "개발자 대시보드 구조 소개"]
 )
 
 
@@ -680,3 +680,52 @@ with tab_matches:
     st.dataframe(view, use_container_width=True)
 
     #streamlit run dashboard_wager_analysis.py
+
+with tab_about:
+    st.subheader("ℹ️ About This Dashboard")
+
+    st.markdown("""
+    ### ⚽ FC ONLINE 경기 분석 대시보드
+
+    본 대시보드는 **FC ONLINE Nexon Open API**를 활용하여  
+    1vs1 공식경기 및 **Volta 공식경기** 데이터를 수집·분석합니다.
+    """)
+
+    st.markdown("---")
+
+    st.markdown("""
+    ### 📁 Data Structure
+
+    - `worldcup_detailed.json` : 내기 경기 상세 데이터  
+    - `volta_matches.json` : Volta 공식경기 수집 데이터  
+    - `nickname_map.json` : OUID ↔ 닉네임 매핑
+    """)
+
+    st.markdown("---")
+
+    st.markdown("""
+    ### 🔧 Features
+
+    - 개인별 승률 · 득점 · 도움 · 평점 분석  
+    - MVP / 승률왕 / 평균 스탯 KPI 제공  
+    - Volta 공식경기 전용 상세 분석  
+    - 경기별 Raw 데이터 테이블
+    """)
+
+    st.markdown("---")
+
+    st.markdown("""
+    ### 🛠 Tech Stack
+
+    - Python (pandas, requests)
+    - Streamlit
+    - Nexon Open API
+    - Git
+    """)
+
+    st.markdown("---")
+
+    st.markdown("""
+    **Made by Sejune Kim**  
+    _Data Analysis & Game Analytics & Business Partnerships Team Staff_
+    """)
