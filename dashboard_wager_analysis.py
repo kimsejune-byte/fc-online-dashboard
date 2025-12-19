@@ -433,7 +433,6 @@ with tab_overview:
 
     components.html(cards_html, height=650, scrolling=False)
 
-    st.markdown("---")
 
 # ---------- 탭 2: 월드컵 유저 비교 ----------
 with tab_compare:
@@ -880,7 +879,6 @@ with tab_about:
         </div>
         """, unsafe_allow_html=True)
 
-    st.markdown("---")
 
     # 하단 글
 st.markdown("---")    
