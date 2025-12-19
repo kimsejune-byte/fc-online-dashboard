@@ -687,7 +687,7 @@ with tab_matches:
 # ================================
 with tab_about:
 
-    st.subheader("## 대시보드 구조 소개")
+    st.subheader("대시보드 구조 소개")
     st.caption("FC ONLINE 데이터 수집 → 저장 → 분석 → 대시보드 시각화")
 
     # -------------------------------------------------
@@ -786,8 +786,7 @@ with tab_about:
             border-left:6px solid #3b82f6;
         ">
             <h4 style="color:white;">refresh_nickname_map.py</h4>
-            <p style="color:#9aa0a6; font-size:13px;">
-            • 유저별 ouid값은 고유값<br>       
+            <p style="color:#9aa0a6; font-size:13px;">      
             • ouid 기준 유저 조회<br>
             • 닉네임 변경시 대시보드에 자동화 반영 시스템 구축
             </p>
@@ -845,7 +844,7 @@ with tab_about:
         ">
             <h4 style="color:white;">volta_run.py</h4>
             <p style="color:#9aa0a6; font-size:13px;">
-            • Volta 공식경기(matchType=214) 수집<br>
+            • Volta 공식경기 수집<br>
             • match-detail 전체 파싱
             </p>
         </div>
