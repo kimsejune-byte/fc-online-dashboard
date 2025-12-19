@@ -681,53 +681,190 @@ with tab_matches:
 
     #streamlit run dashboard_wager_analysis.py
 
+# ---------- 탭 5: 개발자 대시보드 구조 소개 ----------
 with tab_about:
+
     st.subheader("대시보드 구조 소개")
-    st.caption("2025/05/15 ~ 기획한 개인프로젝트입니다.")
+    st.caption("2025년 5월부터 기획/개발된 개인 프로젝트입니다.")
+
+    # ==========================
+    # 프로젝트 개요 카드
+    # ==========================
+    c1, c2 = st.columns(2)
+
+    with c1:
+        st.markdown("""
+        <div style="
+            background:#0e1117;
+            padding:20px;
+            border-radius:16px;
+            box-shadow:0 0 12px rgba(0,0,0,.4);
+        ">
+            <h4 style="color:#ffffff;">🎮 프로젝트 목적</h4>
+            <p style="color:#9aa0a6; font-size:14px;">
+            FC ONLINE 플레이 데이터를 기반으로<br>
+            <b>월드컵(내기·친선)</b>과 <b>Volta 공식경기</b>의<br>
+            성과를 시각화하고 비교 분석하기 위한 개인 프로젝트입니다.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with c2:
+        st.markdown("""
+        <div style="
+            background:#0e1117;
+            padding:20px;
+            border-radius:16px;
+            box-shadow:0 0 12px rgba(0,0,0,.4);
+        ">
+            <h4 style="color:#ffffff;">🧠 설계 철학</h4>
+            <p style="color:#9aa0a6; font-size:14px;">
+            • <b>ouid 기반 데이터 관리</b><br>
+            • 닉네임 변경 대응 구조<br>
+            • 수집 / 집계 / 시각화 분리 설계<br>
+            • 실제 운영 가능한 대시보드 구조
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
     st.markdown("---")
 
-    st.markdown("""
-    ### FC ONLINE 경기 분석 대시보드
+    # ==========================
+    # 2️⃣ 데이터 수집 구조 카드
+    # ==========================
+    st.markdown("### 데이터 수집 구조")
 
-    본 대시보드는 **FC ONLINE Nexon Open API**를 활용하여  
-    1vs1 공식경기 등급 확인 및 자체 월드컵 경기 Match Detail 그리고 **Volta 공식경기** 데이터를 수집·분석합니다.
-    """)
+    c3, c4, c5 = st.columns(3)
+
+    with c3:
+        st.markdown("""
+        <div style="
+            background:#111827;
+            padding:18px;
+            border-radius:14px;
+            border-left:6px solid #3b82f6;
+        ">
+            <h5 style="color:white;">run.py</h5>
+            <p style="color:#9aa0a6; font-size:13px;">
+            • 월드컵(친선/내기) 경기 수집<br>
+            • matchId 기반 저장<br>
+            • worldcup_detailed.json 생성
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with c4:
+        st.markdown("""
+        <div style="
+            background:#111827;
+            padding:18px;
+            border-radius:14px;
+            border-left:6px solid #22c55e;
+        ">
+            <h5 style="color:white;">volta_run.py</h5>
+            <p style="color:#9aa0a6; font-size:13px;">
+            • Volta 공식경기(214) 수집<br>
+            • match-detail 전체 파싱<br>
+            • 득점 / 도움 / 차단 / 평점 포함
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with c5:
+        st.markdown("""
+        <div style="
+            background:#111827;
+            padding:18px;
+            border-radius:14px;
+            border-left:6px solid #f59e0b;
+        ">
+            <h5 style="color:white;">refresh_nickname_map.py</h5>
+            <p style="color:#9aa0a6; font-size:13px;">
+            • ouid 기준 최신 닉네임 조회<br>
+            • nickname_map.json 갱신<br>
+            • 닉네임 변경 자동 대응
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
     st.markdown("---")
 
-    st.markdown("""
-    ### Data Structure
+    # ==========================
+    # 3️⃣ 데이터 파일 구조 카드
+    # ==========================
+    st.markdown("### 🗂 데이터 파일 구조")
 
-    - `worldcup_detailed.json` : 내기 경기 상세 데이터  
-    - `volta_matches.json` : Volta 공식경기 수집 데이터  
-    - `nickname_map.json` : OUID ↔ 닉네임 매핑
-    """)
+    st.markdown("""
+    <div style="
+        background:#0e1117;
+        padding:20px;
+        border-radius:16px;
+        font-family:monospace;
+        color:#d1d5db;
+        font-size:13px;
+    ">
+    📁 FC ONLINE/<br>
+    ├─ dashboard_wager_analysis.py<br>
+    ├─ run.py<br>
+    ├─ volta_run.py<br>
+    ├─ refresh_nickname_map.py<br>
+    ├─ nickname_map.json<br>
+    ├─ worldcup_detailed.json<br>
+    ├─ volta_matches.json<br>
+    └─ assets/<br>
+    &nbsp;&nbsp;&nbsp;└─ tier_icons/
+    </div>
+    """, unsafe_allow_html=True)
 
     st.markdown("---")
 
-    st.markdown("""
-    ### Features
+    # ==========================
+    # 4️⃣ 분석 & 시각화 카드
+    # ==========================
+    st.markdown("### 📊 분석 및 시각화")
 
-    - 개인별 승률 · 득점 · 도움 · 평점 분석  
-    - MVP / 승률왕 / 평균 스탯 KPI 제공  
-    - Volta 공식경기 전용 상세 분석  
-    - 경기별 Raw 데이터 테이블
-    """)
+    c6, c7 = st.columns(2)
+
+    with c6:
+        st.markdown("""
+        <div style="
+            background:#111827;
+            padding:18px;
+            border-radius:14px;
+        ">
+            <h5 style="color:white;">📈 월드컵 분석</h5>
+            <p style="color:#9aa0a6; font-size:13px;">
+            • 승률 / 득점 / 점유율<br>
+            • 유저 간 1vs1 비교<br>
+            • Raw Match 데이터 테이블
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with c7:
+        st.markdown("""
+        <div style="
+            background:#111827;
+            padding:18px;
+            border-radius:14px;
+        ">
+            <h5 style="color:white;">⚽ Volta 공식경기</h5>
+            <p style="color:#9aa0a6; font-size:13px;">
+            • 평균 득점 / 도움 / 차단 KPI<br>
+            • 평점 MVP / 패배 요인 분석<br>
+            • 개인별 상세 경기 로그
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
     st.markdown("---")
 
+    # ==========================
+    # 5️⃣ 제작자 정보
+    # ==========================
     st.markdown("""
-    ### 🛠 Tech Stack
-
-    - Python (pandas, requests)
-    - Streamlit
-    - Nexon Open API
-    - Git
-    """)
-
-    st.markdown("---")
-
-    st.markdown("""
-    **Made by Sejune Kim**  
-    _Data Analysis & Game Analytics & Business Partnerships Team Staff_
-    """)
+    <div style="text-align:center; color:#9aa0a6; font-size:13px;">
+    Made by <b>Sejune</b> · FC ONLINE Data Analytics Project<br>
+    Powered by Nexon Open API & Streamlit
+    </div>
+    """, unsafe_allow_html=True)
