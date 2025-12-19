@@ -678,13 +678,11 @@ with tab_matches:
     view = view.sort_values("date", ascending=False)
     view["date_str"] = view["date"].dt.strftime("%Y-%m-%d %H:%M")
     st.dataframe(view, use_container_width=True)
+    
 
     #streamlit run dashboard_wager_analysis.py
 
 # ---------- 탭 5: 개발자 대시보드 구조 소개 ----------
-# ================================
-#  About 탭
-# ================================
 with tab_about:
 
     st.subheader("대시보드 구조 소개")
@@ -883,8 +881,10 @@ with tab_about:
         """, unsafe_allow_html=True)
 
     st.markdown("---")
+
     # 하단 글
-    st.markdown("""
+st.markdown("---")    
+st.markdown("""
     <div style="text-align:center; color:#9aa0a6; font-size:13px;">
     Made by <b>Sejune Kim</b> · Data Analysis, Business Partnerships Team Staff<br>
     Presented by Sejune PC & Sejune inc,.<br>
