@@ -883,28 +883,11 @@ with tab_about:
         """, unsafe_allow_html=True)
 
     st.markdown("---")
-
-    # =================================================
-    # 4. 구조 요약
-    # =================================================
-    st.markdown("""
-    <div style="
-        background:#0e1117;
-        padding:18px;
-        border-radius:14px;
-        color:#9aa0a6;
-        font-size:14px;
-        line-height:1.6;
-    ">
-    ✔ 수집 로직과 시각화 로직을 분리하여 유지보수 용이<br>
-    ✔ JSON 원본 데이터를 기준으로 모든 분석 수행<br>
-    ✔ 신규 경기 / 신규 분석 지표 확장 가능 구조
-    </div>
-    """, unsafe_allow_html=True)
-
+    # 하단 글
     st.markdown("""
     <div style="text-align:center; color:#9aa0a6; font-size:13px;">
     Made by <b>Sejune Kim</b> · Data Analysis, Business Partnerships Team Staff<br>
+    Presented by Sejune PC & Sejune inc,.<br>
     Powered by Nexon Open API & Streamlit
     </div>
     """, unsafe_allow_html=True)
