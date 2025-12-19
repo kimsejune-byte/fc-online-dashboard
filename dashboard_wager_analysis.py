@@ -682,61 +682,42 @@ with tab_matches:
     #streamlit run dashboard_wager_analysis.py
 
 # ---------- 탭 5: 개발자 대시보드 구조 소개 ----------
+# ================================
+#  About 탭
+# ================================
 with tab_about:
 
-    st.subheader("대시보드 구조 소개")
-    st.caption("2025년 5월부터 기획/개발된 개인 프로젝트입니다.")
+    st.markdown("## ℹ️ About This Dashboard")
+    st.caption("FC ONLINE 데이터 수집 → 저장 → 분석 → 시각화 전체 구조")
 
-    # ==========================
-    # 프로젝트 개요 카드
-    # ==========================
-    c1, c2 = st.columns(2)
-
-    with c1:
-        st.markdown("""
-        <div style="
-            background:#0e1117;
-            padding:20px;
-            border-radius:16px;
-            box-shadow:0 0 12px rgba(0,0,0,.4);
-        ">
-            <h4 style="color:#ffffff;">🎮 프로젝트 목적</h4>
-            <p style="color:#9aa0a6; font-size:14px;">
-            FC ONLINE 플레이 데이터를 기반으로<br>
-            <b>월드컵(내기·친선)</b>과 <b>Volta 공식경기</b>의<br>
-            성과를 시각화하고 비교 분석하기 위한 개인 프로젝트입니다.
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with c2:
-        st.markdown("""
-        <div style="
-            background:#0e1117;
-            padding:20px;
-            border-radius:16px;
-            box-shadow:0 0 12px rgba(0,0,0,.4);
-        ">
-            <h4 style="color:#ffffff;">🧠 설계 철학</h4>
-            <p style="color:#9aa0a6; font-size:14px;">
-            • <b>ouid 기반 데이터 관리</b><br>
-            • 닉네임 변경 대응 구조<br>
-            • 수집 / 집계 / 시각화 분리 설계<br>
-            • 실제 운영 가능한 대시보드 구조
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
+    # -------------------------------------------------
+    # 0. 전체 개요
+    # -------------------------------------------------
+    st.markdown("""
+    <div style="
+        background:#0e1117;
+        padding:18px;
+        border-radius:14px;
+        color:#9aa0a6;
+        font-size:14px;
+        line-height:1.6;
+    ">
+    본 대시보드는 <b>Python 기반 수집 스크립트</b>와 <b>JSON 데이터 레이어</b>,
+    그리고 <b>Streamlit 시각화</b>로 구성된 데이터 파이프라인 구조입니다.<br>
+    모든 데이터는 원본을 보존하며, 분석 로직과 시각화 로직은 분리되어 있습니다.
+    </div>
+    """, unsafe_allow_html=True)
 
     st.markdown("---")
 
-    # ==========================
-    # 2️⃣ 데이터 수집 구조 카드
-    # ==========================
-    st.markdown("### 데이터 수집 구조")
+    # =================================================
+    # 1. 월드컵 데이터 흐름
+    # =================================================
+    st.markdown("### 🌍 월드컵 데이터 흐름 (WorldCup Pipeline)")
 
-    c3, c4, c5 = st.columns(3)
+    c1, c2, c3 = st.columns(3)
 
-    with c3:
+    with c1:
         st.markdown("""
         <div style="
             background:#111827;
@@ -744,16 +725,16 @@ with tab_about:
             border-radius:14px;
             border-left:6px solid #3b82f6;
         ">
-            <h5 style="color:white;">run.py</h5>
+            <h4 style="color:white;">① run.py</h4>
             <p style="color:#9aa0a6; font-size:13px;">
-            • 월드컵(친선/내기) 경기 수집<br>
-            • matchId 기반 저장<br>
-            • worldcup_detailed.json 생성
+            • 월드컵 친선 / 내기 경기 수집<br>
+            • matchId 기반 데이터 수집<br>
+            • Nexon Open API 호출
             </p>
         </div>
         """, unsafe_allow_html=True)
 
-    with c4:
+    with c2:
         st.markdown("""
         <div style="
             background:#111827;
@@ -761,11 +742,53 @@ with tab_about:
             border-radius:14px;
             border-left:6px solid #22c55e;
         ">
-            <h5 style="color:white;">volta_run.py</h5>
+            <h4 style="color:white;">② worldcup_detailed.json</h4>
             <p style="color:#9aa0a6; font-size:13px;">
-            • Volta 공식경기(214) 수집<br>
-            • match-detail 전체 파싱<br>
-            • 득점 / 도움 / 차단 / 평점 포함
+            • 경기 단위 Raw JSON 저장<br>
+            • 날짜 / matchId / 참가자 정보<br>
+            • 원본 데이터 보존
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with c3:
+        st.markdown("""
+        <div style="
+            background:#111827;
+            padding:18px;
+            border-radius:14px;
+            border-left:6px solid #f59e0b;
+        ">
+            <h4 style="color:white;">③ Dashboard 분석</h4>
+            <p style="color:#9aa0a6; font-size:13px;">
+            • 승률 / 득점 / 비교 분석<br>
+            • 1vs1 유저 비교<br>
+            • Raw Data 테이블 제공
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # =================================================
+    # 2. 닉네임 동기화 흐름
+    # =================================================
+    st.markdown("### 🏷 닉네임 동기화 흐름 (Nickname Sync)")
+
+    c4, c5, c6 = st.columns(3)
+
+    with c4:
+        st.markdown("""
+        <div style="
+            background:#111827;
+            padding:18px;
+            border-radius:14px;
+            border-left:6px solid #10b981;
+        ">
+            <h4 style="color:white;">① refresh_nickname_map.py</h4>
+            <p style="color:#9aa0a6; font-size:13px;">
+            • ouid 기준 유저 조회<br>
+            • 닉네임 변경 자동 반영
             </p>
         </div>
         """, unsafe_allow_html=True)
@@ -776,54 +799,15 @@ with tab_about:
             background:#111827;
             padding:18px;
             border-radius:14px;
-            border-left:6px solid #f59e0b;
+            border-left:6px solid #22c55e;
         ">
-            <h5 style="color:white;">refresh_nickname_map.py</h5>
+            <h4 style="color:white;">② nickname_map.json</h4>
             <p style="color:#9aa0a6; font-size:13px;">
-            • ouid 기준 최신 닉네임 조회<br>
-            • nickname_map.json 갱신<br>
-            • 닉네임 변경 자동 대응
+            • ouid → nickname 매핑 테이블<br>
+            • 모든 분석의 기준 데이터
             </p>
         </div>
         """, unsafe_allow_html=True)
-
-    st.markdown("---")
-
-    # ==========================
-    # 3️⃣ 데이터 파일 구조 카드
-    # ==========================
-    st.markdown("### 🗂 데이터 파일 구조")
-
-    st.markdown("""
-    <div style="
-        background:#0e1117;
-        padding:20px;
-        border-radius:16px;
-        font-family:monospace;
-        color:#d1d5db;
-        font-size:13px;
-    ">
-    📁 FC ONLINE/<br>
-    ├─ dashboard_wager_analysis.py<br>
-    ├─ run.py<br>
-    ├─ volta_run.py<br>
-    ├─ refresh_nickname_map.py<br>
-    ├─ nickname_map.json<br>
-    ├─ worldcup_detailed.json<br>
-    ├─ volta_matches.json<br>
-    └─ assets/<br>
-    &nbsp;&nbsp;&nbsp;└─ tier_icons/
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("---")
-
-    # ==========================
-    # 4️⃣ 분석 & 시각화 카드
-    # ==========================
-    st.markdown("### 📊 분석 및 시각화")
-
-    c6, c7 = st.columns(2)
 
     with c6:
         st.markdown("""
@@ -831,15 +815,24 @@ with tab_about:
             background:#111827;
             padding:18px;
             border-radius:14px;
+            border-left:6px solid #f59e0b;
         ">
-            <h5 style="color:white;">📈 월드컵 분석</h5>
+            <h4 style="color:white;">③ Dashboard 반영</h4>
             <p style="color:#9aa0a6; font-size:13px;">
-            • 승률 / 득점 / 점유율<br>
-            • 유저 간 1vs1 비교<br>
-            • Raw Match 데이터 테이블
+            • 닉네임 변경 즉시 반영<br>
+            • 과거 기록 일관성 유지
             </p>
         </div>
         """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # =================================================
+    # 3. Volta 공식경기 데이터 흐름
+    # =================================================
+    st.markdown("### ⚽ Volta 공식경기 데이터 흐름")
+
+    c7, c8, c9 = st.columns(3)
 
     with c7:
         st.markdown("""
@@ -847,24 +840,71 @@ with tab_about:
             background:#111827;
             padding:18px;
             border-radius:14px;
+            border-left:6px solid #ef4444;
         ">
-            <h5 style="color:white;">⚽ Volta 공식경기</h5>
+            <h4 style="color:white;">① volta_run.py</h4>
             <p style="color:#9aa0a6; font-size:13px;">
-            • 평균 득점 / 도움 / 차단 KPI<br>
-            • 평점 MVP / 패배 요인 분석<br>
-            • 개인별 상세 경기 로그
+            • Volta 공식경기(matchType=214) 수집<br>
+            • match-detail 전체 파싱
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with c8:
+        st.markdown("""
+        <div style="
+            background:#111827;
+            padding:18px;
+            border-radius:14px;
+            border-left:6px solid #f97316;
+        ">
+            <h4 style="color:white;">② volta_matches.json</h4>
+            <p style="color:#9aa0a6; font-size:13px;">
+            • 개인별 경기 로그 저장<br>
+            • 득점 / 도움 / 차단 / 평점
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with c9:
+        st.markdown("""
+        <div style="
+            background:#111827;
+            padding:18px;
+            border-radius:14px;
+            border-left:6px solid #eab308;
+        ">
+            <h4 style="color:white;">③ Volta Dashboard</h4>
+            <p style="color:#9aa0a6; font-size:13px;">
+            • MVP / 승률왕 / 패배 요인 분석<br>
+            • 개인별 상세 경기 테이블
             </p>
         </div>
         """, unsafe_allow_html=True)
 
     st.markdown("---")
 
-    # ==========================
-    # 5️⃣ 제작자 정보
-    # ==========================
+    # =================================================
+    # 4. 구조 요약
+    # =================================================
+    st.markdown("""
+    <div style="
+        background:#0e1117;
+        padding:18px;
+        border-radius:14px;
+        color:#9aa0a6;
+        font-size:14px;
+        line-height:1.6;
+    ">
+    ✔ 수집 로직과 시각화 로직을 분리하여 유지보수 용이<br>
+    ✔ JSON 원본 데이터를 기준으로 모든 분석 수행<br>
+    ✔ 신규 경기 / 신규 분석 지표 확장 가능 구조
+    </div>
+    """, unsafe_allow_html=True)
+
     st.markdown("""
     <div style="text-align:center; color:#9aa0a6; font-size:13px;">
-    Made by <b>Sejune</b> · FC ONLINE Data Analytics Project<br>
+    Made by <b>Sejune Kim</b> · Data Analysis, Business Partnerships Team Staff<br>
     Powered by Nexon Open API & Streamlit
     </div>
     """, unsafe_allow_html=True)
