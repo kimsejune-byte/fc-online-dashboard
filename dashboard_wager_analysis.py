@@ -684,12 +684,13 @@ with tab_matches:
 with tab_about:
     st.subheader("대시보드 구조 소개")
     st.caption("2025/05/15 ~ 기획한 개인프로젝트입니다.")
+    st.markdown("---")
 
     st.markdown("""
-    ###FC ONLINE 경기 분석 대시보드
+    ### FC ONLINE 경기 분석 대시보드
 
     본 대시보드는 **FC ONLINE Nexon Open API**를 활용하여  
-    1vs1 공식경기 및 **Volta 공식경기** 데이터를 수집·분석합니다.
+    1vs1 공식경기 등급 확인 및 자체 월드컵 경기 Match Detail 그리고 **Volta 공식경기** 데이터를 수집·분석합니다.
     """)
 
     st.markdown("---")
