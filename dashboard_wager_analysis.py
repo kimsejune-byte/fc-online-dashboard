@@ -788,7 +788,7 @@ with tab_about:
             <h4 style="color:white;">refresh_nickname_map.py</h4>
             <p style="color:#9aa0a6; font-size:13px;">
             • ouid 기준 유저 조회<br>
-            • 닉네임 변경시 대시보드에 자동화 반영 시스템 구축
+            • 닉네임 변경시 대시보드에 자동 반영
             </p>
         </div>
         """, unsafe_allow_html=True)
