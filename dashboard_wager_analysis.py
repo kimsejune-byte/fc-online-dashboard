@@ -885,7 +885,6 @@ st.markdown("---")
 st.markdown("""
     <div style="text-align:center; color:#9aa0a6; font-size:13px;">
     Made by <b>Sejune Kim</b> · Data Analysis, Business Partnerships Team Staff<br>
-    Presented by Sejune PC & Sejune inc,.<br>
     Powered by Nexon Open API & Streamlit
     </div>
     """, unsafe_allow_html=True)
