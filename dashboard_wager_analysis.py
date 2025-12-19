@@ -682,10 +682,11 @@ with tab_matches:
     #streamlit run dashboard_wager_analysis.py
 
 with tab_about:
-    st.subheader("ℹ️ About This Dashboard")
+    st.subheader("대시보드 구조 소개")
+    st.caption("2025/05/15 ~ 기획한 개인프로젝트입니다.")
 
     st.markdown("""
-    ### ⚽ FC ONLINE 경기 분석 대시보드
+    ###FC ONLINE 경기 분석 대시보드
 
     본 대시보드는 **FC ONLINE Nexon Open API**를 활용하여  
     1vs1 공식경기 및 **Volta 공식경기** 데이터를 수집·분석합니다.
@@ -694,7 +695,7 @@ with tab_about:
     st.markdown("---")
 
     st.markdown("""
-    ### 📁 Data Structure
+    ### Data Structure
 
     - `worldcup_detailed.json` : 내기 경기 상세 데이터  
     - `volta_matches.json` : Volta 공식경기 수집 데이터  
@@ -704,7 +705,7 @@ with tab_about:
     st.markdown("---")
 
     st.markdown("""
-    ### 🔧 Features
+    ### Features
 
     - 개인별 승률 · 득점 · 도움 · 평점 분석  
     - MVP / 승률왕 / 평균 스탯 KPI 제공  
