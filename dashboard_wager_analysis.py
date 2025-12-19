@@ -701,7 +701,8 @@ with tab_about:
     ">
     본 대시보드는 <b>Python 기반 수집 스크립트</b>와 <b>JSON 데이터 레이어</b>,
     그리고 <b>Streamlit 시각화</b>로 구성된 데이터 파이프라인 구조입니다.<br>
-    모든 데이터는 NEXON OPEN API를 통해 통신 및 원본을 보존하며, 분석 로직과 시각화 로직은 분리되어 있습니다.
+    모든 데이터는 NEXON OPEN API를 통해 통신 및 원본을 보존하며, 분석 로직과 시각화 로직은 분리되어 있습니다.<br>
+    2025년 05월부터 기획 • 개발되었으며, 2026년 월드컵 경기부터 적용됩니다.
     </div>
     """, unsafe_allow_html=True)
 
@@ -881,6 +882,7 @@ with tab_about:
 
 
     # 하단 글
+
 st.markdown("---")    
 st.markdown("""
     <div style="text-align:center; color:#9aa0a6; font-size:13px;">
