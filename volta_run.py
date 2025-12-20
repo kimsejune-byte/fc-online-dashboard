@@ -2,6 +2,7 @@
 import requests
 import json
 from pathlib import Path
+from datetime import datetime, timedelta, timezone
 from tqdm import tqdm
 
 # ==============================
@@ -13,7 +14,9 @@ HEADERS = {"x-nxopen-api-key": API_KEY}
 BASE_DIR = Path(__file__).resolve().parent
 OUTPUT_PATH = BASE_DIR / "volta_matches.json"
 
-MATCH_TYPE_VOLTA = 214
+MATCH_TYPE_VOLTA = 214  # 볼타 공식경기
+
+KST = timezone(timedelta(hours=9))
 
 # ==============================
 # 우리 멤버
@@ -28,48 +31,54 @@ OUR_PLAYERS = {
 }
 OUR_OUIDS = set(OUR_PLAYERS.keys())
 
-print("\n[INFO] OUR_OUIDS 준비 완료:")
+print("\n[INFO] OUR_OUIDS 준비 완료")
 print(OUR_OUIDS)
 
 # ==============================
-# API
+# API 함수
 # ==============================
-def fetch_match_list(ouid):
+def fetch_match_list(ouid: str, limit: int = 50):
     url = "https://open.api.nexon.com/fconline/v1/user/match"
     params = {
         "ouid": ouid,
         "matchtype": MATCH_TYPE_VOLTA,
         "offset": 0,
-        "limit": 100
+        "limit": limit,
     }
     res = requests.get(url, headers=HEADERS, params=params)
-    return res.json() if res.status_code == 200 else []
+    if res.status_code != 200:
+        return []
+    return res.json()
 
 
-def fetch_match_detail(match_id):
+def fetch_match_detail(match_id: str):
     url = "https://open.api.nexon.com/fconline/v1/match-detail"
     res = requests.get(url, headers=HEADERS, params={"matchid": match_id})
-    return res.json() if res.status_code == 200 else None
+    if res.status_code != 200:
+        return None
+    return res.json()
 
 # ==============================
-# 메인 수집
+# 메인 수집 로직
 # ==============================
 def collect_volta_matches():
+    # 기존 데이터
     if OUTPUT_PATH.exists():
         saved = json.load(open(OUTPUT_PATH, encoding="utf-8"))
     else:
         saved = []
 
-    saved_keys = {(m["matchId"], m["ouid"]) for m in saved}
+    saved_keys = {(r["matchId"], r["ouid"]) for r in saved}
 
-    print("\n🔍 볼타 공식경기 matchId 수집 중...\n")
-
+    print("\n🔍 볼타 공식경기 matchId 수집 중...")
     all_match_ids = set()
+
     for ouid, name in OUR_PLAYERS.items():
         print(f" - {name}")
-        all_match_ids.update(fetch_match_list(ouid))
+        ids = fetch_match_list(ouid)
+        all_match_ids.update(ids)
 
-    print(f"\n🔎 전체 수집된 match 수: {len(all_match_ids)}")
+    print(f"\n🔎 전체 match 수: {len(all_match_ids)}")
 
     new_rows = []
 
@@ -78,7 +87,14 @@ def collect_volta_matches():
         if not detail:
             continue
 
-        match_date = detail.get("matchDate", "").split(".")[0]
+        # --- 날짜 (KST 변환) ---
+        raw_date = detail.get("matchDate")
+        if raw_date:
+            dt = datetime.fromisoformat(raw_date.replace("Z", ""))
+            dt = dt.astimezone(KST)
+            match_date = dt.strftime("%Y-%m-%d %H:%M:%S")
+        else:
+            match_date = None
 
         for info in detail.get("matchInfo", []):
             ouid = info.get("ouid")
@@ -89,41 +105,35 @@ def collect_volta_matches():
             if key in saved_keys:
                 continue
 
-            # ✅ 여기 중요
-            players = info.get("player", [])
-            goals = assists = blocks = 0
-            ratings = []
-
-            for p in players:
-                status = p.get("status", {})
-                goals += status.get("goal", 0)
-                assists += status.get("assist", 0)
-                blocks += status.get("block", 0)
-
-                if status.get("spRating") is not None:
-                    ratings.append(status["spRating"])
-
-            avg_rating = round(sum(ratings) / len(ratings), 2) if ratings else 0.0
+            # =========================
+            # ✅ Volta 핵심: player[0].status
+            # =========================
+            status = {}
+            if info.get("player"):
+                status = info["player"][0].get("status", {})
 
             new_rows.append({
                 "matchId": match_id,
                 "date": match_date,
                 "matchType": MATCH_TYPE_VOLTA,
                 "ouid": ouid,
-                "nickname": OUR_PLAYERS[ouid],
+                "nickname": OUR_PLAYERS.get(ouid),
                 "matchResult": info.get("matchDetail", {}).get("matchResult"),
-                "goal": goals,
-                "assist": assists,
-                "block": blocks,
-                "rating": avg_rating,
+
+                # --- 개인 스탯 (정답 경로) ---
+                "goal": status.get("goal", 0),
+                "assist": status.get("assist", 0),
+                "block": status.get("block", 0),
+                "block_try": status.get("blockTry", 0),
+                "rating": round(status.get("spRating", 0.0), 2),
             })
 
     if new_rows:
         saved.extend(new_rows)
-        json.dump(saved, open(OUTPUT_PATH, "w", encoding="utf-8"),
-                  ensure_ascii=False, indent=2)
+        with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
+            json.dump(saved, f, ensure_ascii=False, indent=2)
 
-    print(f"\n✅ 새로 저장된 볼타 공식경기: {len(new_rows)}개")
+    print(f"\n✅ 새로 저장된 볼타 경기: {len(new_rows)}개")
 
 # ==============================
 # 실행

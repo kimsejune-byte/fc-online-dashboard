@@ -17,6 +17,19 @@ from pathlib import Path
 API_KEY = "live_7a611a04eeb1ac043f43a92245935f274608d65acac4fcb584f1baad81aa8bd7efe8d04e6d233bd35cf2fabdeb93fb0d"
 HEADERS = {"x-nxopen-api-key": API_KEY}
 
+# ================================
+#  공통 시간 변환 함수
+# ================================
+def to_kst(series):
+    """
+    Nexon Open API matchDate → KST 변환
+    (UTC → Asia/Seoul)
+    """
+    return (
+        pd.to_datetime(series, utc=True, errors="coerce")
+        .dt.tz_convert("Asia/Seoul")
+    )
+
 # OS별 BASE_DIR (세준 환경 기준)
 
 
