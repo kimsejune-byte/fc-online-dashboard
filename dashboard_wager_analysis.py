@@ -20,15 +20,27 @@ HEADERS = {"x-nxopen-api-key": API_KEY}
 # ================================
 #  공통 시간 변환 함수
 # ================================
-def to_kst(series):
+from datetime import datetime, timedelta, timezone
+
+KST = timezone(timedelta(hours=9))
+
+def to_kst(dt):
     """
-    Nexon Open API matchDate → KST 변환
-    (UTC → Asia/Seoul)
+    UTC / naive datetime → KST datetime
     """
-    return (
-        pd.to_datetime(series, utc=True, errors="coerce")
-        .dt.tz_convert("Asia/Seoul")
-    )
+    if dt is None or pd.isna(dt):
+        return None
+
+    if isinstance(dt, str):
+        try:
+            dt = datetime.fromisoformat(dt.replace("Z", ""))
+        except:
+            return None
+
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+
+    return dt.astimezone(KST)
 
 # OS별 BASE_DIR (세준 환경 기준)
 
@@ -505,7 +517,7 @@ with tab_volta:
     # ------------------------------
     df["date"] = pd.to_datetime(df["date"])
 
-    numeric_cols = ["goal", "assist", "block", "rating"]
+    numeric_cols = ["goal", "assist", "block_try", "rating"]
     for c in numeric_cols:
         df[c] = pd.to_numeric(df[c], errors="coerce").fillna(0)
 
@@ -522,7 +534,7 @@ with tab_volta:
             lose=("matchResult", lambda x: (x == "패").sum()),
             goal=("goal", "sum"),
             assist=("assist", "sum"),
-            block=("block", "sum"),
+            block_try=("block_try", "sum"),
             avg_rating=("rating", "mean"),
         )
     )
@@ -537,7 +549,7 @@ with tab_volta:
     # ---------- 평균 스탯 계산 ----------
     stats_df["avg_goal"] = (stats_df["goal"] / stats_df["games"]).round(2)
     stats_df["avg_assist"] = (stats_df["assist"] / stats_df["games"]).round(2)
-    stats_df["avg_block"] = (stats_df["block"] / stats_df["games"]).round(2)
+    stats_df["avg_block_try"] = (stats_df["block_try"] / stats_df["games"]).round(2)
 
     # ---------- MVP / 패배범인 ----------
     mvp = stats_df.sort_values("avg_rating", ascending=False).iloc[0]
@@ -547,7 +559,7 @@ with tab_volta:
     # ---------- 평균 스탯 TOP ----------
     top_goal = stats_df.sort_values("avg_goal", ascending=False).iloc[0]
     top_assist = stats_df.sort_values("avg_assist", ascending=False).iloc[0]
-    top_block = stats_df.sort_values("avg_block", ascending=False).iloc[0]
+    top_block_try = stats_df.sort_values("avg_block_try", ascending=False).iloc[0]
 
     # =====================================================
     # 🥇 1줄 KPI : MVP / 패배 범인
@@ -555,19 +567,19 @@ with tab_volta:
     k1, k2, k3 = st.columns(3)
 
     k1.metric(
-        "⭐ 평점 MVP",
+        "⭐ 평점 MVP (Most Valuable Player)",
         f"{mvp['avg_rating']} / 10점",
         mvp["nickname"]
     )
 
     k2.metric(
-        "승률 KING",
+        "승률 왕",
         f"{win_king['win_rate']}%",
         win_king["nickname"]
     )
 
     k3.metric(
-        "패배 요인 (평점 최저)",
+        "평점 MWP (Most Weak Player)",
         f"{loser['avg_rating']} / 10점",
         loser["nickname"]
     )
@@ -578,21 +590,21 @@ with tab_volta:
     k4, k5, k6 = st.columns(3)
 
     k4.metric(
-        "평균 득점",
+        "평균 득점왕",
         f"{top_goal['avg_goal']}회",
         top_goal["nickname"]
     )
 
     k5.metric(
-        "평균 도움",
+        "평균 도움왕",
         f"{top_assist['avg_assist']}회",
         top_assist["nickname"]
     )
 
     k6.metric(
-        "평균 차단",
-        f"{top_block['avg_block']}회",
-        top_block["nickname"]
+        "평균 차단왕",
+        f"{top_block_try['avg_block_try']}회",
+        top_block_try["nickname"]
     )
 
     st.markdown("---")
@@ -619,7 +631,7 @@ with tab_volta:
             "win_rate": "승률(%)",
             "goal": "득점",
             "assist": "도움",
-            "block": "차단",
+            "block_try": "차단",
             "avg_rating": "평균 평점",
         })
         .sort_values("승률(%)", ascending=False)
@@ -665,14 +677,14 @@ with tab_volta:
     detail_view = detail_df[
         [
             "date", "matchResult", "goal",
-            "assist", "block", "rating", "matchId"
+            "assist", "block_try", "rating", "matchId"
         ]
     ].rename(columns={
         "date": "경기일시",
         "matchResult": "결과",
         "goal": "득점",
         "assist": "도움",
-        "block": "차단",
+        "block_try": "차단",
         "rating": "평점",
         "matchId": "매치 ID"
     })
