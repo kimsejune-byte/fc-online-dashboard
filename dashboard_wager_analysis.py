@@ -619,7 +619,7 @@ with tab_volta:
         stats_df[
             [
                 "nickname", "games", "win", "draw", "lose",
-                "win_rate", "goal", "assist", "block", "avg_rating"
+                "win_rate", "goal", "assist", "block_try", "avg_rating"
             ]
         ]
         .rename(columns={
