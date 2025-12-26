@@ -345,6 +345,12 @@ with tab_overview:
             return TIER_ICON_DIR / "champions.png"
         if "슈퍼챌린지" in name:
             return TIER_ICON_DIR / "super_challenger.png"
+        if "챌린저1" in name:
+            return TIER_ICON_DIR / "challenger_1.png"
+        if "챌린저2" in name:
+            return TIER_ICON_DIR / "challenger_2.png"
+        if "챌린저3" in name:
+            return TIER_ICON_DIR / "challenger_3.png"
         if "월드클래스1" in name:
             return TIER_ICON_DIR / "worldclass_1.png"
         if "월드클래스2" in name:
@@ -355,6 +361,8 @@ with tab_overview:
             return TIER_ICON_DIR / "pro_1.png"
         if "프로2" in name:
             return TIER_ICON_DIR / "pro_2.png"
+        if "프로3" in name:
+            return TIER_ICON_DIR / "pro_3.png"
         return None
 
     # -------------------------------
