@@ -920,6 +920,7 @@ st.markdown("---")
 st.markdown("""
     <div style="text-align:center; color:#9aa0a6; font-size:13px;">
     Made by <b>Sejune Kim</b> · Data Analysis, Business Partnerships Team Staff<br>
-    Powered by Nexon Open API & Streamlit
+    Powered by Nexon Open API & Streamlit<br>
+    Contact us : junabuddy@xgolf.com · junabuddy@naver.com · junabuddy75@gmail.com
     </div>
     """, unsafe_allow_html=True)
